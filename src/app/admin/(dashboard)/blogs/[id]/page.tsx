@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ApiClient } from "../../../../../lib/api";
-import { Save, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { Save, ArrowLeft, Image as ImageIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
+import AIGenerator from "../../../../../../components/admin/ui/AIGenerator";
+import ImageUpload from "../../../../../../components/admin/ui/ImageUpload";
 
 export default function BlogFormPage() {
   const router = useRouter();
@@ -28,7 +30,7 @@ export default function BlogFormPage() {
   });
 
   const [tags, setTags] = useState("");
-  const [gallery, setGallery] = useState("");
+  const [gallery, setGallery] = useState<string[]>([]);
   const [seo, setSeo] = useState({ title: "", description: "" });
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function BlogFormPage() {
           video: blog.video || "",
         });
         setTags(blog.tags?.join(", ") || "");
-        setGallery(blog.gallery?.join(", ") || "");
+        setGallery(blog.gallery || []);
         setSeo({
           title: blog.seo?.title || "",
           description: blog.seo?.description || ""
@@ -72,6 +74,48 @@ export default function BlogFormPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const removeArrayItem = (setter: any, index: number, array: string[]) => {
+    const newArray = array.filter((_, i) => i !== index);
+    setter(newArray);
+  };
+
+  const handleGenerateBlog = async (prompt: string) => {
+    if (!isNew && formData.title) {
+      if (!window.confirm('Generate new content?\n\nThis will replace the current form values with AI-generated content.')) {
+        return;
+      }
+    }
+    
+    const response = await ApiClient.post('/api/admin/ai/generate-blog', { prompt });
+    const data = response.data?.data;
+    
+    if (data) {
+      setFormData(prev => ({
+        ...prev,
+        title: data.title ?? prev.title,
+        slug: data.slug ?? prev.slug,
+        excerpt: data.excerpt ?? prev.excerpt,
+        content: data.content ?? prev.content,
+        author: data.author ?? prev.author,
+        category: data.category ?? prev.category,
+        featuredImage: data.featuredImage ?? prev.featuredImage,
+        video: data.video ?? prev.video,
+      }));
+      if (Array.isArray(data.tags)) {
+        setTags(data.tags.join(", "));
+      }
+      if (Array.isArray(data.gallery)) {
+        setGallery(data.gallery);
+      }
+      if (data.seo) {
+        setSeo({
+          title: data.seo.title || "",
+          description: data.seo.description || ""
+        });
+      }
+    }
+  };
+
   const handleSeoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setSeo({ ...seo, [e.target.name]: e.target.value });
   };
@@ -84,7 +128,7 @@ export default function BlogFormPage() {
     const payload = {
       ...formData,
       tags: tags.split(",").map(t => t.trim()).filter(Boolean),
-      gallery: gallery.split(",").map(t => t.trim()).filter(Boolean),
+      gallery: gallery.filter(Boolean),
       seo,
     };
 
@@ -102,111 +146,133 @@ export default function BlogFormPage() {
     }
   };
 
-  if (loading) return <div className="text-white p-8">Loading...</div>;
+  if (loading) return <div className="text-technic-text p-8">Loading...</div>;
 
   return (
-    <div className="max-w-4xl pb-20">
+    <div className="max-w-4xl mx-auto pb-20 ">
       <div className="flex items-center mb-8">
-        <Link href="/admin/blogs" className="text-slate-400 hover:text-white mr-4 transition-colors">
+        <Link href="/admin/blogs" className="text-technic-muted hover:text-technic-cyan-deep mr-4 transition-colors">
           <ArrowLeft className="w-6 h-6" />
         </Link>
-        <h1 className="text-3xl font-bold text-white font-heading">
+        <h1 className="text-3xl font-bold text-technic-text font-heading">
           {isNew ? 'Create New Blog Post' : 'Edit Blog Post'}
         </h1>
       </div>
 
+      <AIGenerator onGenerate={handleGenerateBlog} disabled={saving} type="blog" />
+
       {error && (
-        <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 p-4 rounded-xl mb-6">
+        <div className="bg-technic-error-soft border border-technic-error/20 text-technic-error p-4 rounded-xl mb-6">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Info */}
-        <div className="bg-[#131C31] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-xl font-bold text-white mb-6">Basic Information</h2>
+        <div className="bg-white border border-technic-border rounded-2xl shadow-tn-md p-6">
+          <h2 className="text-xl font-bold text-technic-text mb-6">Basic Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Title *</label>
-              <input name="title" value={formData.title} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Title *</label>
+              <input name="title" value={formData.title} onChange={handleChange} required className="tn-input" />
             </div>
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Slug (URL friendly) *</label>
-              <input name="slug" value={formData.slug} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Slug (URL friendly) *</label>
+              <input name="slug" value={formData.slug} onChange={handleChange} required className="tn-input" />
             </div>
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Category *</label>
-              <input name="category" value={formData.category} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Category *</label>
+              <input name="category" value={formData.category} onChange={handleChange} required className="tn-input" />
             </div>
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Author *</label>
-              <input name="author" value={formData.author} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Author *</label>
+              <input name="author" value={formData.author} onChange={handleChange} required className="tn-input" />
             </div>
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Status</label>
-              <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white">
+              <label className="tn-label">Status</label>
+              <select name="status" value={formData.status} onChange={handleChange} className="tn-input">
                 <option value="Draft">Draft</option>
                 <option value="Published">Published</option>
               </select>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Excerpt *</label>
-              <textarea name="excerpt" value={formData.excerpt} onChange={handleChange} required rows={3} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white"></textarea>
+              <label className="tn-label">Excerpt *</label>
+              <textarea name="excerpt" value={formData.excerpt} onChange={handleChange} required rows={3} className="tn-input"></textarea>
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="bg-[#131C31] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-xl font-bold text-white mb-6">Article Content</h2>
+        <div className="bg-white border border-technic-border rounded-2xl shadow-tn-md p-6">
+          <h2 className="text-xl font-bold text-technic-text mb-6">Article Content</h2>
           <div className="mb-6">
-            <label className="block text-sm text-slate-300 mb-2">Markdown Content *</label>
-            <textarea name="content" value={formData.content} onChange={handleChange} required rows={15} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-4 text-white font-mono text-sm leading-relaxed" placeholder="# Header\n\nParagraph text..."></textarea>
+            <label className="tn-label">Markdown Content *</label>
+            <textarea name="content" value={formData.content} onChange={handleChange} required rows={15} className="tn-input font-mono text-sm leading-relaxed" placeholder="# Header\n\nParagraph text..."></textarea>
           </div>
         </div>
 
         {/* Media */}
-        <div className="bg-[#131C31] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-xl font-bold text-white mb-6 flex items-center">
-            <ImageIcon className="w-5 h-5 mr-2 text-orange-400" /> Media
+        <div className="bg-white border border-technic-border rounded-2xl shadow-tn-md p-6">
+          <h2 className="text-xl font-bold text-technic-text mb-6 flex items-center">
+            <ImageIcon className="w-5 h-5 mr-2 text-technic-cyan-deep" /> Media
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Featured Image URL</label>
-              <input name="featuredImage" value={formData.featuredImage} onChange={handleChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" placeholder="https://..." />
+              <ImageUpload
+                label="Featured image"
+                value={formData.featuredImage}
+                folder="blogs"
+                onChange={(url) => setFormData((prev) => ({ ...prev, featuredImage: url }))}
+              />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Gallery Image URLs (comma separated)</label>
-              <input value={gallery} onChange={(e) => setGallery(e.target.value)} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" placeholder="url1, url2..." />
+              <div className="flex justify-between items-center mb-3">
+                <label className="block text-sm text-technic-secondary">Gallery images</label>
+              </div>
+              <ImageUpload
+                label="Add gallery image"
+                folder="blogs"
+                onChange={(url) => setGallery((prev) => [...prev, url])}
+              />
+              <div className="mt-4 space-y-3">
+                {gallery.map((item, idx) => (
+                  <div key={`${item}-${idx}`} className="flex items-center gap-3">
+                    <img src={item} alt="" className="h-16 w-24 rounded-lg border border-technic-border object-cover" />
+                    <p className="flex-1 break-all text-xs text-technic-muted">{item}</p>
+                    <button type="button" onClick={() => removeArrayItem(setGallery, idx, gallery)} className="p-2 text-technic-error hover:bg-technic-error-soft rounded-lg"><Trash2 className="w-5 h-5" aria-hidden="true" /><span className="sr-only">Delete</span></button>
+                  </div>
+                ))}
+                {gallery.length === 0 && <p className="text-technic-muted italic text-sm">No gallery images added.</p>}
+              </div>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Video URL</label>
-              <input name="video" value={formData.video} onChange={handleChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Video URL</label>
+              <input name="video" value={formData.video} onChange={handleChange} className="tn-input" />
             </div>
           </div>
         </div>
 
         {/* Meta Data */}
-        <div className="bg-[#131C31] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-xl font-bold text-white mb-6">SEO & Metadata</h2>
+        <div className="bg-white border border-technic-border rounded-2xl shadow-tn-md p-6">
+          <h2 className="text-xl font-bold text-technic-text mb-6">SEO & Metadata</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Tags (comma separated)</label>
-              <input value={tags} onChange={(e) => setTags(e.target.value)} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" placeholder="technology, ai, cloud" />
+              <label className="tn-label">Tags (comma separated)</label>
+              <input value={tags} onChange={(e) => setTags(e.target.value)} className="tn-input" placeholder="technology, ai, cloud" />
             </div>
             <div>
-              <label className="block text-sm text-slate-300 mb-2">SEO Title</label>
-              <input name="title" value={seo.title} onChange={handleSeoChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">SEO Title</label>
+              <input name="title" value={seo.title} onChange={handleSeoChange} className="tn-input" />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">SEO Description</label>
-              <textarea name="description" value={seo.description} onChange={handleSeoChange} rows={3} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white"></textarea>
+              <label className="tn-label">SEO Description</label>
+              <textarea name="description" value={seo.description} onChange={handleSeoChange} rows={3} className="tn-input"></textarea>
             </div>
           </div>
         </div>
 
         <div className="flex justify-end">
-          <button type="submit" disabled={saving} className="bg-gradient-to-r from-orange-600 to-rose-600 text-white px-8 py-3 rounded-xl font-bold flex items-center hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all disabled:opacity-50">
+          <button type="submit" disabled={saving} className="bg-brand-gradient text-white px-8 py-3 rounded-xl font-bold flex items-center hover:shadow-tn-sm transition-all disabled:opacity-50">
             {saving ? 'Saving...' : <><Save className="w-5 h-5 mr-2" /> Save Blog Post</>}
           </button>
         </div>

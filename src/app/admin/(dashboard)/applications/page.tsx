@@ -26,30 +26,30 @@ export default function ApplicationsListPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'New': return <span className="bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-1 rounded-md text-xs font-medium">New</span>;
-      case 'Reviewing': return <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-1 rounded-md text-xs font-medium">Reviewing</span>;
-      case 'Shortlisted': return <span className="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-1 rounded-md text-xs font-medium">Shortlisted</span>;
-      case 'Interview': return <span className="bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2 py-1 rounded-md text-xs font-medium">Interview</span>;
-      case 'Hired': return <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-md text-xs font-medium">Hired</span>;
-      case 'Rejected': return <span className="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-1 rounded-md text-xs font-medium">Rejected</span>;
-      default: return <span className="bg-slate-500/20 text-slate-400 border border-slate-500/30 px-2 py-1 rounded-md text-xs font-medium">{status}</span>;
+      case 'New': return <span className="bg-technic-cyan-soft text-technic-cyan-deep border border-technic-cyan/30 px-2 py-1 rounded-md text-xs font-medium">New</span>;
+      case 'Reviewing': return <span className="bg-technic-orange-soft text-technic-orange-deep border border-technic-orange/30 px-2 py-1 rounded-md text-xs font-medium">Reviewing</span>;
+      case 'Shortlisted': return <span className="bg-technic-cyan-soft text-technic-cyan-deep border border-technic-cyan/30 px-2 py-1 rounded-md text-xs font-medium">Shortlisted</span>;
+      case 'Interview': return <span className="bg-technic-orange-soft text-technic-orange-deep border border-technic-orange/30 px-2 py-1 rounded-md text-xs font-medium">Interview</span>;
+      case 'Hired': return <span className="bg-technic-success-soft text-technic-success border border-technic-success/20 px-2 py-1 rounded-md text-xs font-medium">Hired</span>;
+      case 'Rejected': return <span className="bg-technic-error-soft text-technic-error border border-technic-error/20 px-2 py-1 rounded-md text-xs font-medium">Rejected</span>;
+      default: return <span className="bg-technic-neutral-soft text-technic-muted border border-technic-border px-2 py-1 rounded-md text-xs font-medium">{status}</span>;
     }
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-white font-heading">Job Applications</h1>
+        <h1 className="text-3xl font-bold text-technic-text font-heading">Job Applications</h1>
       </div>
 
-      <div className="bg-[#131C31] border border-white/10 rounded-2xl overflow-hidden">
+      <div className="bg-white border border-technic-border rounded-2xl shadow-tn-md overflow-x-auto">
         {loading ? (
-          <div className="p-8 text-center text-slate-400">Loading applications...</div>
+          <div className="p-8 text-center text-technic-muted">Loading applications...</div>
         ) : applications.length === 0 ? (
-          <div className="p-8 text-center text-slate-400">No applications received yet.</div>
+          <div className="p-8 text-center text-technic-muted">No applications received yet.</div>
         ) : (
-          <table className="w-full text-left">
-            <thead className="bg-white/5 text-slate-300 border-b border-white/10">
+          <table className="w-full min-w-[720px] text-left">
+            <thead className="bg-technic-header text-technic-muted border-b border-technic-border">
               <tr>
                 <th className="p-4 font-medium">Date</th>
                 <th className="p-4 font-medium">Applicant</th>
@@ -61,27 +61,27 @@ export default function ApplicationsListPage() {
             </thead>
             <tbody>
               {applications.map((app) => (
-                <tr key={app._id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td className="p-4 text-slate-400 text-sm">{new Date(app.createdAt).toLocaleDateString()}</td>
+                <tr key={app._id} className="border-b border-technic-border hover:bg-technic-bg transition-colors">
+                  <td className="p-4 text-technic-muted text-sm">{new Date(app.createdAt).toLocaleDateString()}</td>
                   <td className="p-4">
-                    <div className="text-white font-medium">{app.applicantName}</div>
-                    <div className="text-slate-400 text-xs flex items-center mt-1">
+                    <div className="text-technic-text font-medium">{app.applicantName}</div>
+                    <div className="text-technic-muted text-xs flex items-center mt-1">
                       <Mail className="w-3 h-3 mr-1" /> {app.email}
                     </div>
                   </td>
-                  <td className="p-4 text-slate-300">
+                  <td className="p-4 text-technic-secondary">
                     <div className="flex items-center">
-                      <Briefcase className="w-4 h-4 mr-2 text-orange-400" />
+                      <Briefcase className="w-4 h-4 mr-2 text-technic-cyan-deep" />
                       {app.jobId?.title || 'Unknown Job'}
                     </div>
                   </td>
-                  <td className="p-4 text-slate-400">{app.experience}</td>
+                  <td className="p-4 text-technic-muted">{app.experience}</td>
                   <td className="p-4">
                     {getStatusBadge(app.status)}
                   </td>
                   <td className="p-4 flex space-x-3">
-                    <Link href={`/admin/applications/${app._id}`} className="text-blue-400 hover:text-blue-300" title="Review Application">
-                      <Eye className="w-5 h-5" />
+                    <Link href={`/admin/applications/${app._id}`} className="text-technic-cyan-deep hover:text-technic-cyan" title="Review Application">
+                      <Eye className="w-5 h-5" aria-hidden="true" /><span className="sr-only">View</span>
                     </Link>
                   </td>
                 </tr>

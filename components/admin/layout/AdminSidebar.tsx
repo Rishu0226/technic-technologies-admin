@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -13,7 +14,8 @@ import {
   Image as ImageIcon,
   Settings,
   LogOut,
-  Users
+  Users,
+  X,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -44,8 +46,20 @@ const NAV_ITEMS = [
   },
 ];
 
-const AdminSidebar: React.FC = () => {
+export default function AdminSidebar({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   const pathname = usePathname();
+
+  useEffect(() => {
+    onClose();
+    // Close the drawer after navigation. onClose is stable enough for this layout.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -54,85 +68,99 @@ const AdminSidebar: React.FC = () => {
     return pathname?.startsWith(href);
   };
 
+  const itemClass = (active: boolean) =>
+    `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-200 border-l-2 ${
+      active
+        ? "bg-technic-cyan-soft text-technic-cyan-deep border-technic-cyan font-medium"
+        : "text-technic-secondary border-transparent hover:bg-technic-cyan-soft hover:text-technic-cyan-deep"
+    }`;
+
   const handleLogout = async () => {
     try {
-      // Import axios dynamically or just use standard fetch since we need withCredentials
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/auth/logout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
       });
     } catch (e) {
-      console.error('Logout error', e);
+      console.error("Logout error", e);
     } finally {
-      window.location.href = '/admin/login?expired=true';
+      window.location.href = "/admin/login?expired=true";
     }
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-64 bg-[#0B1221] border-r border-white/10 z-40 hidden md:flex flex-col">
-      {/* Brand */}
-      <div className="h-16 flex items-center px-6 border-b border-white/10 shrink-0">
-        <Link href="/admin" className="text-xl font-bold text-white tracking-wider flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center shadow-[0_0_15px_rgba(249,115,22,0.4)]">
-            <span className="text-white font-bold text-lg leading-none">T</span>
-          </div>
-          Technic Admin
-        </Link>
-      </div>
-
-      {/* Navigation */}
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 no-scrollbar">
-        {/* Dashboard Link */}
-        <div>
-          <Link
-            href="/admin"
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-              isActive("/admin")
-                ? "bg-white/10 text-orange-400 font-medium shadow-[0_0_15px_rgba(249,115,22,0.1)] border border-orange-500/20"
-                : "text-slate-400 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            <LayoutDashboard className="w-5 h-5" />
-            Dashboard
+    <>
+      {open && (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-technic-text/30 md:hidden"
+          aria-label="Close navigation"
+          onClick={onClose}
+        />
+      )}
+      <aside
+        className={`fixed inset-y-0 left-0 w-64 bg-white border-r border-technic-border z-50 flex flex-col transition-transform duration-300 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
+        <div className="h-16 flex items-center justify-between px-4 border-b border-technic-border shrink-0">
+          <Link href="/admin" className="flex items-center min-w-0" aria-label="Technic Technologies admin">
+            <Image
+              src="/Assest/logo-brand.png"
+              alt="Technic Technologies"
+              width={180}
+              height={48}
+              className="h-10 w-auto"
+              priority
+            />
           </Link>
+          <button
+            type="button"
+            className="md:hidden p-2 rounded-lg text-technic-secondary hover:bg-technic-bg"
+            onClick={onClose}
+            aria-label="Close menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Groups */}
-        {NAV_ITEMS.filter((item) => item.items).map((group, idx) => (
-          <div key={idx}>
-            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3 px-3">
-              {group.label}
-            </h4>
-            <div className="space-y-1">
-              {group.items?.map((item, itemIdx) => (
-                <Link
-                  key={itemIdx}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 ${
-                    isActive(item.href)
-                      ? "bg-white/10 text-orange-400 font-medium shadow-[0_0_15px_rgba(249,115,22,0.1)] border border-orange-500/20"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span className="text-sm">{item.label}</span>
-                </Link>
-              ))}
-            </div>
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 no-scrollbar">
+          <div>
+            <Link href="/admin" className={itemClass(isActive("/admin"))}>
+              <LayoutDashboard className="w-5 h-5" />
+              Dashboard
+            </Link>
           </div>
-        ))}
-      </div>
 
-      {/* Footer Profile & Logout */}
-      <div className="p-4 border-t border-white/10 shrink-0">
-        <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors group">
-          <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium text-sm">Logout</span>
-        </button>
-      </div>
-    </aside>
+          {NAV_ITEMS.filter((item) => item.items).map((group) => (
+            <div key={group.label}>
+              <h2 className="text-xs font-semibold text-technic-muted uppercase tracking-widest mb-3 px-3">
+                {group.label}
+              </h2>
+              <div className="space-y-1">
+                {group.items?.map((item) => (
+                  <Link key={item.href} href={item.href} className={itemClass(!!isActive(item.href))}>
+                    <item.icon className="w-4 h-4" />
+                    <span className="text-sm">{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="p-4 border-t border-technic-border shrink-0">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full text-technic-secondary hover:text-technic-error hover:bg-technic-error-soft transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium text-sm">Logout</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
-};
-
-export default AdminSidebar;
+}

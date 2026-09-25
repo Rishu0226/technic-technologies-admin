@@ -22,16 +22,8 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-// See "Matching Paths" below to learn more
+// Only guard admin pages. Public files such as /Assest/logo-brand.png
+// must stay outside this matcher, or the image optimizer receives the login redirect.
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths for the admin panel except:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
-  ],
+  matcher: ["/admin/:path*"],
 };

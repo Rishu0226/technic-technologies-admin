@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { ApiClient } from "../../../../../lib/api";
 import { Save, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import ImageUpload from "../../../../../../components/admin/ui/ImageUpload";
 
 export default function ServiceFormPage() {
   const router = useRouter();
@@ -78,64 +79,68 @@ export default function ServiceFormPage() {
     }
   };
 
-  if (loading) return <div className="text-white p-8">Loading...</div>;
+  if (loading) return <div className="text-technic-text p-8">Loading...</div>;
 
   return (
-    <div className="max-w-3xl pb-20">
+    <div className="max-w-3xl mx-auto pb-20">
       <div className="flex items-center mb-8">
-        <Link href="/admin/services" className="text-slate-400 hover:text-white mr-4 transition-colors">
+        <Link href="/admin/services" className="text-technic-muted hover:text-technic-cyan-deep mr-4 transition-colors">
           <ArrowLeft className="w-6 h-6" />
         </Link>
-        <h1 className="text-3xl font-bold text-white font-heading">
+        <h1 className="text-3xl font-bold text-technic-text font-heading">
           {isNew ? 'Create New Service' : 'Edit Service'}
         </h1>
       </div>
 
       {error && (
-        <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 p-4 rounded-xl mb-6">
+        <div className="bg-technic-error-soft border border-technic-error/20 text-technic-error p-4 rounded-xl mb-6">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="bg-[#131C31] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-xl font-bold text-white mb-6">Service Details</h2>
+        <div className="bg-white border border-technic-border rounded-2xl shadow-tn-md p-6">
+          <h2 className="text-xl font-bold text-technic-text mb-6">Service Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Service Title *</label>
-              <input name="title" value={formData.title} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Service Title *</label>
+              <input name="title" value={formData.title} onChange={handleChange} required className="tn-input" />
             </div>
             
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Slug (URL friendly) *</label>
-              <input name="slug" value={formData.slug} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Slug (URL friendly) *</label>
+              <input name="slug" value={formData.slug} onChange={handleChange} required className="tn-input" />
             </div>
             
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Icon Name (Lucide React) *</label>
-              <input name="icon" value={formData.icon} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" placeholder="e.g. Code2, Smartphone, Globe" />
-              <p className="text-xs text-slate-500 mt-1">Must exactly match a Lucide React icon name.</p>
+              <label className="tn-label">Icon Name (Lucide React) *</label>
+              <input name="icon" value={formData.icon} onChange={handleChange} required className="tn-input" placeholder="e.g. Code2, Smartphone, Globe" />
+              <p className="text-xs text-technic-muted mt-1">Must exactly match a Lucide React icon name.</p>
             </div>
             
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Description *</label>
-              <textarea name="description" value={formData.description} onChange={handleChange} required rows={4} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white"></textarea>
+              <label className="tn-label">Description *</label>
+              <textarea name="description" value={formData.description} onChange={handleChange} required rows={4} className="tn-input"></textarea>
             </div>
             
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Optional Header Image URL</label>
-              <input name="image" value={formData.image} onChange={handleChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" placeholder="https://..." />
+              <ImageUpload
+                label="Header image"
+                value={formData.image}
+                folder="services"
+                onChange={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+              />
             </div>
             
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Display Order</label>
-              <input type="number" name="order" value={formData.order} onChange={handleChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
-              <p className="text-xs text-slate-500 mt-1">Lower numbers appear first.</p>
+              <label className="tn-label">Display Order</label>
+              <input type="number" name="order" value={formData.order} onChange={handleChange} className="tn-input" />
+              <p className="text-xs text-technic-muted mt-1">Lower numbers appear first.</p>
             </div>
             
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Status</label>
-              <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white">
+              <label className="tn-label">Status</label>
+              <select name="status" value={formData.status} onChange={handleChange} className="tn-input">
                 <option value="Draft">Draft</option>
                 <option value="Published">Published</option>
               </select>
@@ -144,7 +149,7 @@ export default function ServiceFormPage() {
         </div>
 
         <div className="flex justify-end">
-          <button type="submit" disabled={saving} className="bg-gradient-to-r from-orange-600 to-rose-600 text-white px-8 py-3 rounded-xl font-bold flex items-center hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all disabled:opacity-50">
+          <button type="submit" disabled={saving} className="bg-brand-gradient text-white px-8 py-3 rounded-xl font-bold flex items-center hover:shadow-tn-sm transition-all disabled:opacity-50">
             {saving ? 'Saving...' : <><Save className="w-5 h-5 mr-2" /> Save Service</>}
           </button>
         </div>

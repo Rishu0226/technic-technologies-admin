@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { ApiClient } from "../../../../../lib/api";
 import { Save, ArrowLeft, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
+import ImageUpload from "../../../../../../components/admin/ui/ImageUpload";
 
 export default function ProductFormPage() {
   const router = useRouter();
@@ -97,67 +98,71 @@ export default function ProductFormPage() {
     }
   };
 
-  if (loading) return <div className="text-white p-8">Loading...</div>;
+  if (loading) return <div className="text-technic-text p-8">Loading...</div>;
 
   return (
-    <div className="max-w-4xl pb-20">
+    <div className="max-w-4xl mx-auto pb-20">
       <div className="flex items-center mb-8">
-        <Link href="/admin/products" className="text-slate-400 hover:text-white mr-4 transition-colors">
+        <Link href="/admin/products" className="text-technic-muted hover:text-technic-cyan-deep mr-4 transition-colors">
           <ArrowLeft className="w-6 h-6" />
         </Link>
-        <h1 className="text-3xl font-bold text-white font-heading">
+        <h1 className="text-3xl font-bold text-technic-text font-heading">
           {isNew ? 'Create New Product' : 'Edit Product'}
         </h1>
       </div>
 
       {error && (
-        <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 p-4 rounded-xl mb-6">
+        <div className="bg-technic-error-soft border border-technic-error/20 text-technic-error p-4 rounded-xl mb-6">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="bg-[#131C31] border border-white/10 rounded-2xl p-6">
-          <h2 className="text-xl font-bold text-white mb-6">Product Details</h2>
+        <div className="bg-white border border-technic-border rounded-2xl shadow-tn-md p-6">
+          <h2 className="text-xl font-bold text-technic-text mb-6">Product Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Product Name *</label>
-              <input name="name" value={formData.name} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Product Name *</label>
+              <input name="name" value={formData.name} onChange={handleChange} required className="tn-input" />
             </div>
             
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Slug (URL friendly) *</label>
-              <input name="slug" value={formData.slug} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Slug (URL friendly) *</label>
+              <input name="slug" value={formData.slug} onChange={handleChange} required className="tn-input" />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Tagline *</label>
-              <input name="tagline" value={formData.tagline} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" placeholder="e.g. AI-Powered Enterprise Resource Planning" />
+              <label className="tn-label">Tagline *</label>
+              <input name="tagline" value={formData.tagline} onChange={handleChange} required className="tn-input" placeholder="e.g. AI-Powered Enterprise Resource Planning" />
             </div>
             
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Icon Name (Lucide React) *</label>
-              <input name="icon" value={formData.icon} onChange={handleChange} required className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" placeholder="e.g. Brain, Database, Cloud" />
+              <label className="tn-label">Icon Name (Lucide React) *</label>
+              <input name="icon" value={formData.icon} onChange={handleChange} required className="tn-input" placeholder="e.g. Brain, Database, Cloud" />
             </div>
 
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Display Order</label>
-              <input type="number" name="order" value={formData.order} onChange={handleChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" />
+              <label className="tn-label">Display Order</label>
+              <input type="number" name="order" value={formData.order} onChange={handleChange} className="tn-input" />
             </div>
             
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Description *</label>
-              <textarea name="description" value={formData.description} onChange={handleChange} required rows={4} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white"></textarea>
+              <label className="tn-label">Description *</label>
+              <textarea name="description" value={formData.description} onChange={handleChange} required rows={4} className="tn-input"></textarea>
             </div>
             
             <div className="md:col-span-2">
-              <label className="block text-sm text-slate-300 mb-2">Optional Header Image URL</label>
-              <input name="image" value={formData.image} onChange={handleChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" placeholder="https://..." />
+              <ImageUpload
+                label="Header image"
+                value={formData.image}
+                folder="products"
+                onChange={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+              />
             </div>
             
             <div>
-              <label className="block text-sm text-slate-300 mb-2">Status</label>
-              <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white">
+              <label className="tn-label">Status</label>
+              <select name="status" value={formData.status} onChange={handleChange} className="tn-input">
                 <option value="Draft">Draft</option>
                 <option value="Published">Published</option>
               </select>
@@ -166,27 +171,27 @@ export default function ProductFormPage() {
         </div>
 
         {/* Dynamic Features List */}
-        <div className="bg-[#131C31] border border-white/10 rounded-2xl p-6">
+        <div className="bg-white border border-technic-border rounded-2xl shadow-tn-md p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-white">Product Features</h2>
-            <button type="button" onClick={addFeature} className="text-orange-400 text-sm flex items-center">
+            <h2 className="text-xl font-bold text-technic-text">Product Features</h2>
+            <button type="button" onClick={addFeature} className="text-technic-cyan-deep text-sm flex items-center">
               <Plus className="w-4 h-4 mr-1" /> Add Feature
             </button>
           </div>
-          <p className="text-sm text-slate-400 mb-4">List the key features of this product (displayed as bullet points).</p>
+          <p className="text-sm text-technic-muted mb-4">List the key features of this product (displayed as bullet points).</p>
           <div className="space-y-3">
             {features.map((item, idx) => (
               <div key={idx} className="flex gap-2">
-                <input value={item} onChange={(e) => handleFeatureChange(idx, e.target.value)} className="flex-1 bg-[#0B1221] border border-white/10 rounded-lg px-4 py-2 text-white" placeholder={`Feature ${idx + 1}`} />
-                <button type="button" onClick={() => removeFeature(idx)} className="p-2 text-rose-400 hover:bg-rose-500/10 rounded-lg"><Trash2 className="w-5 h-5" /></button>
+                <input value={item} onChange={(e) => handleFeatureChange(idx, e.target.value)} className="tn-input flex-1" placeholder={`Feature ${idx + 1}`} />
+                <button type="button" onClick={() => removeFeature(idx)} className="p-2 text-technic-error hover:bg-technic-error-soft rounded-lg"><Trash2 className="w-5 h-5" aria-hidden="true" /><span className="sr-only">Delete</span></button>
               </div>
             ))}
-            {features.length === 0 && <p className="text-slate-500 italic text-sm">No features added yet.</p>}
+            {features.length === 0 && <p className="text-technic-muted italic text-sm">No features added yet.</p>}
           </div>
         </div>
 
         <div className="flex justify-end">
-          <button type="submit" disabled={saving} className="bg-gradient-to-r from-orange-600 to-rose-600 text-white px-8 py-3 rounded-xl font-bold flex items-center hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] transition-all disabled:opacity-50">
+          <button type="submit" disabled={saving} className="bg-brand-gradient text-white px-8 py-3 rounded-xl font-bold flex items-center hover:shadow-tn-sm transition-all disabled:opacity-50">
             {saving ? 'Saving...' : <><Save className="w-5 h-5 mr-2" /> Save Product</>}
           </button>
         </div>
