@@ -2,7 +2,7 @@ import { readAdminToken } from "./session";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-export async function uploadImage(file: File, folder: "blogs" | "products" | "services" | "media") {
+export async function uploadImage(file: File, folder: "blogs" | "products" | "services" | "solutions" | "media") {
   const body = new FormData();
   body.append("image", file);
   body.append("folder", folder);

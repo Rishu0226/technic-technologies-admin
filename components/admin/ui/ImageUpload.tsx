@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ImagePlus, Loader2 } from "lucide-react";
 import { uploadImage } from "../../../src/lib/upload";
 
-type Folder = "blogs" | "products" | "services" | "media";
+type Folder = "blogs" | "products" | "services" | "solutions" | "media";
 
 export default function ImageUpload({
   label,
@@ -26,6 +26,14 @@ export default function ImageUpload({
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      setError("Upload a JPG, PNG, WEBP, GIF, or video file.");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      setError("File must be 4 MB or smaller.");
+      return;
+    }
 
     setUploading(true);
     setError(null);
@@ -56,7 +64,14 @@ export default function ImageUpload({
             {uploading ? "Uploading..." : accept.startsWith("video/") ? "Upload video" : "Upload image"}
             <input type="file" accept={accept} className="sr-only" onChange={onFile} disabled={uploading} />
           </label>
-          {value && <p className="mt-2 break-all text-xs text-technic-muted">{value}</p>}
+          {value && (
+            <div className="mt-2 flex items-center gap-3">
+              <p className="break-all text-xs text-technic-muted">{value}</p>
+              <button type="button" onClick={() => onChange("")} className="shrink-0 text-sm font-medium text-technic-error">
+                Remove
+              </button>
+            </div>
+          )}
           {error && <p className="mt-2 text-sm text-technic-error">{error}</p>}
         </div>
       </div>

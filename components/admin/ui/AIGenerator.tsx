@@ -5,10 +5,30 @@ import { toast } from "react-hot-toast";
 interface AIGeneratorProps {
   onGenerate: (prompt: string) => Promise<void>;
   disabled?: boolean;
-  type: "blog" | "career";
+  replaceExisting?: boolean;
+  type: "blog" | "career" | "service";
 }
 
-export default function AIGenerator({ onGenerate, disabled, type }: AIGeneratorProps) {
+function askToReplace() {
+  return new Promise<boolean>((resolve) => {
+    toast.custom((item) => (
+      <div className="w-80 rounded-xl border border-technic-border bg-white p-4 shadow-tn-md">
+        <p className="text-sm font-semibold text-technic-text">Replace the current content?</p>
+        <p className="mt-1 text-sm text-technic-secondary">AI will fill the form. Uploaded images stay as they are.</p>
+        <div className="mt-3 flex justify-end gap-2">
+          <button type="button" className="rounded-lg px-3 py-1.5 text-sm text-technic-secondary" onClick={() => { toast.dismiss(item.id); resolve(false); }}>
+            Cancel
+          </button>
+          <button type="button" className="rounded-lg bg-brand-gradient px-3 py-1.5 text-sm font-semibold text-white" onClick={() => { toast.dismiss(item.id); resolve(true); }}>
+            Replace
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity });
+  });
+}
+
+export default function AIGenerator({ onGenerate, disabled, replaceExisting = false, type }: AIGeneratorProps) {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -18,9 +38,15 @@ export default function AIGenerator({ onGenerate, disabled, type }: AIGeneratorP
       return;
     }
 
+    if (replaceExisting) {
+      const confirmed = await askToReplace();
+      if (!confirmed) return;
+    }
+
     setIsGenerating(true);
     try {
       await onGenerate(prompt);
+      toast.success("Form updated from your prompt.");
     } catch (err: any) {
       console.error(err);
       toast.error(err.response?.data?.error || "Failed to generate content");
@@ -31,7 +57,9 @@ export default function AIGenerator({ onGenerate, disabled, type }: AIGeneratorP
 
   const placeholder = type === "blog"
     ? "e.g., Write an SEO-friendly blog about the future of AI in modern web development..."
-    : "e.g., Create a Senior Full Stack Developer position for our Noida office...";
+    : type === "career"
+    ? "e.g., Create a Senior Full Stack Developer position for our Noida office..."
+    : "e.g., Write a Custom Website Development service page for growing businesses...";
 
   return (
     <div className="bg-white border border-technic-border rounded-2xl p-6 mb-8 shadow-tn-sm">

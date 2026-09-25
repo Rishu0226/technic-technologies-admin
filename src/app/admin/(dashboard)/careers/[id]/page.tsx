@@ -143,12 +143,6 @@ export default function CareerFormPage() {
   };
 
   const handleGenerateCareer = async (prompt: string) => {
-    if (!isNew && formData.title) {
-      if (!window.confirm('Generate new content?\n\nThis will replace the current form values with AI-generated content.')) {
-        return;
-      }
-    }
-    
     const response = await ApiClient.post('/api/admin/ai/generate-career', { prompt });
     const data = response.data?.data;
     
@@ -244,7 +238,7 @@ export default function CareerFormPage() {
         </h1>
       </div>
 
-      <AIGenerator onGenerate={handleGenerateCareer} disabled={saving} type="career" />
+      <AIGenerator onGenerate={handleGenerateCareer} disabled={saving} replaceExisting={!isNew && Boolean(formData.title)} type="career" />
 
       {error && (
         <div className="bg-technic-error-soft border border-technic-error/20 text-technic-error p-4 rounded-xl mb-6">

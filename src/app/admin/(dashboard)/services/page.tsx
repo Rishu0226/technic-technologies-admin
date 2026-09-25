@@ -2,10 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, Eye } from "lucide-react";
 import { ApiClient } from "../../../../lib/api";
 import ConfirmDialog from "../../../../../components/admin/ui/ConfirmDialog";
 import { toast } from "react-hot-toast";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3005";
 
 export default function ServicesListPage() {
   const [services, setServices] = useState<any[]>([]);
@@ -64,9 +66,11 @@ export default function ServicesListPage() {
             <thead className="bg-technic-header text-technic-muted border-b border-technic-border">
               <tr>
                 <th className="p-4 font-medium">Order</th>
+                <th className="p-4 font-medium">Icon</th>
                 <th className="p-4 font-medium">Title</th>
-                <th className="p-4 font-medium">Icon (Ref)</th>
+                <th className="p-4 font-medium">Slug</th>
                 <th className="p-4 font-medium">Status</th>
+                <th className="p-4 font-medium">Updated</th>
                 <th className="p-4 font-medium">Actions</th>
               </tr>
             </thead>
@@ -74,14 +78,25 @@ export default function ServicesListPage() {
               {services.sort((a, b) => a.order - b.order).map((service) => (
                 <tr key={service._id} className="border-b border-technic-border hover:bg-technic-bg transition-colors">
                   <td className="p-4 text-technic-muted">{service.order}</td>
-                  <td className="p-4 text-technic-text font-medium">{service.title}</td>
                   <td className="p-4 text-technic-muted">{service.icon}</td>
+                  <td className="p-4 text-technic-text font-medium">{service.title}</td>
+                  <td className="p-4 text-technic-muted">{service.slug}</td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-md text-xs font-medium ${service.status === 'Published' ? 'bg-technic-success-soft text-technic-success' : 'bg-technic-neutral-soft text-technic-muted'}`}>
                       {service.status}
                     </span>
                   </td>
+                  <td className="p-4 text-technic-muted">{service.updatedAt ? new Date(service.updatedAt).toLocaleDateString() : "—"}</td>
                   <td className="p-4 flex space-x-3">
+                    {service.status === "Published" ? (
+                      <a href={`${siteUrl}/services/${service.slug}`} target="_blank" rel="noreferrer" className="text-technic-cyan-deep hover:text-technic-cyan">
+                        <Eye className="w-5 h-5" aria-hidden="true" /><span className="sr-only">View</span>
+                      </a>
+                    ) : (
+                      <Link href={`/admin/services/${service._id}/preview`} className="text-technic-cyan-deep hover:text-technic-cyan">
+                        <Eye className="w-5 h-5" aria-hidden="true" /><span className="sr-only">View</span>
+                      </Link>
+                    )}
                     <Link href={`/admin/services/${service._id}`} className="text-technic-cyan-deep hover:text-technic-cyan">
                       <Edit className="w-5 h-5" aria-hidden="true" /><span className="sr-only">Edit</span>
                     </Link>
