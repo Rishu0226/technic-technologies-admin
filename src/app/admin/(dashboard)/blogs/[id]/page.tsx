@@ -246,8 +246,13 @@ export default function BlogFormPage() {
               </div>
             </div>
             <div className="md:col-span-2">
-              <label className="tn-label">Video URL</label>
-              <input name="video" value={formData.video} onChange={handleChange} className="tn-input" />
+              <ImageUpload
+                label="Video"
+                value={formData.video}
+                folder="blogs"
+                accept="video/mp4,video/webm,video/quicktime"
+                onChange={(url) => setFormData((prev) => ({ ...prev, video: url }))}
+              />
             </div>
           </div>
         </div>
