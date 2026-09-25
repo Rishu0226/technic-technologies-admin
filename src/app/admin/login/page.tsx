@@ -5,6 +5,7 @@ import Image from "next/image";
 import { LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { ApiClient } from "../../../lib/api";
+import { saveAdminToken } from "../../../lib/session";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -20,15 +21,7 @@ export default function LoginPage() {
         throw new Error("Login did not return a token");
       }
 
-      const session = await fetch("/api/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
-      if (!session.ok) {
-        throw new Error("Could not start the admin session");
-      }
-
+      saveAdminToken(token);
       window.location.assign("/admin");
     } catch (err: any) {
       setError(err.response?.data?.error || err.response?.data?.message || err.message || "Invalid email or password.");
