@@ -15,10 +15,9 @@ ApiClient.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Hit backend logout endpoint to clear HttpOnly cookie
       if (typeof window !== 'undefined' && !window.location.pathname.includes('/admin/login')) {
-        axios.post(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/auth/logout`, {}, { withCredentials: true })
-          .finally(() => {
-            window.location.href = '/admin/login?expired=true';
-          });
+        fetch('/api/session', { method: 'DELETE' }).finally(() => {
+          window.location.href = '/admin/login';
+        });
       }
     }
     return Promise.reject(error);

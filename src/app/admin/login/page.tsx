@@ -5,10 +5,8 @@ import Image from "next/image";
 import { LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { ApiClient } from "../../../lib/api";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   const { register, handleSubmit, formState: { isSubmitting } } = useForm();
@@ -16,10 +14,24 @@ export default function LoginPage() {
   const onSubmit = async (data: any) => {
     setError(null);
     try {
-      await ApiClient.post("/api/auth/login", data);
-      router.push("/admin");
+      const response = await ApiClient.post("/api/auth/login", data);
+      const token = response.data?.token;
+      if (!token) {
+        throw new Error("Login did not return a token");
+      }
+
+      const session = await fetch("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (!session.ok) {
+        throw new Error("Could not start the admin session");
+      }
+
+      window.location.assign("/admin");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Invalid email or password.");
+      setError(err.response?.data?.error || err.response?.data?.message || err.message || "Invalid email or password.");
     }
   };
 

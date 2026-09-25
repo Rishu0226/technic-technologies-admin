@@ -77,15 +77,18 @@ export default function AdminSidebar({
 
   const handleLogout = async () => {
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/logout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
+      await Promise.all([
+        fetch("/api/session", { method: "DELETE" }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }),
+      ]);
     } catch (e) {
       console.error("Logout error", e);
     } finally {
-      window.location.href = "/admin/login?expired=true";
+      window.location.href = "/admin/login";
     }
   };
 
