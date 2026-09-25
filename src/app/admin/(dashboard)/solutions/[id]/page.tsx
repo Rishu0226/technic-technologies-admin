@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowDown, ArrowLeft, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { ApiClient } from "../../../../../lib/api";
+import AIGenerator from "../../../../../../components/admin/ui/AIGenerator";
 import ImageUpload from "../../../../../../components/admin/ui/ImageUpload";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3005";
@@ -107,6 +108,48 @@ export default function SolutionFormPage() {
       .finally(() => setLoading(false));
   }, [isNew, params.id]);
 
+  const handleGenerateSolution = async (prompt: string) => {
+    const response = await ApiClient.post("/api/admin/ai/generate-solution", { prompt });
+    const data = response.data?.data;
+    if (!data) return;
+
+    setSlugEdited(true);
+    setForm((prev) => ({
+      ...prev,
+      title: data.title || prev.title,
+      slug: isNew ? (data.slug || prev.slug) : prev.slug,
+      shortDescription: data.shortDescription || prev.shortDescription,
+      description: data.description || prev.description,
+      industry: data.industry || prev.industry,
+      icon: data.icon || prev.icon,
+      heroTitle: data.heroTitle || prev.heroTitle,
+      heroDescription: data.heroDescription || prev.heroDescription,
+      heroImage: prev.heroImage,
+      cardImage: prev.cardImage,
+      overviewImage: prev.overviewImage,
+      overview: {
+        title: data.overview?.title || prev.overview.title,
+        description: data.overview?.description || prev.overview.description,
+      },
+      benefits: Array.isArray(data.benefits) ? data.benefits : prev.benefits,
+      features: Array.isArray(data.features) ? data.features : prev.features,
+      useCases: Array.isArray(data.useCases) ? data.useCases : prev.useCases,
+      process: Array.isArray(data.process) ? data.process : prev.process,
+      technologies: Array.isArray(data.technologies) ? data.technologies : prev.technologies,
+      faqs: Array.isArray(data.faqs) ? data.faqs : prev.faqs,
+      cta: {
+        title: data.cta?.title || prev.cta.title,
+        description: data.cta?.description || prev.cta.description,
+        buttonText: data.cta?.buttonText || prev.cta.buttonText,
+      },
+      seo: {
+        metaTitle: data.seo?.metaTitle || prev.seo.metaTitle,
+        metaDescription: data.seo?.metaDescription || prev.seo.metaDescription,
+        keywords: data.seo?.keywords || prev.seo.keywords,
+      },
+    }));
+  };
+
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!slugPattern.test(form.slug)) {
@@ -165,6 +208,7 @@ export default function SolutionFormPage() {
           <a href={`${siteUrl}/solutions/${form.slug}`} target="_blank" rel="noreferrer" className="rounded-xl border border-technic-border px-4 py-2 text-sm font-semibold">View</a>
         )}
       </div>
+      <AIGenerator onGenerate={handleGenerateSolution} disabled={saving} replaceExisting={!isNew && Boolean(form.title)} type="solution" />
       {error && <p className="mb-4 rounded-xl bg-technic-error-soft p-4 text-technic-error">{error}</p>}
       <form onSubmit={save} className="space-y-4">
         <Section title="Basic Information" open>
