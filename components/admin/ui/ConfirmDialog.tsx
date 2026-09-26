@@ -1,5 +1,8 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@mui/material";
+import { Trash2 } from "lucide-react";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -34,12 +37,42 @@ export default function ConfirmDialog({ open, title, content, onClose, onConfirm
       </DialogContent>
       <DialogActions style={{ padding: "16px" }}>
         <Button onClick={onClose} style={{ color: "#4B5563", border: "1px solid #E5E7EB" }}>
-          Cancel
+          No
         </Button>
         <Button onClick={onConfirm} variant="contained" style={{ backgroundColor: "#DC2626", color: "#FFFFFF" }}>
-          Confirm
+          Yes
         </Button>
       </DialogActions>
     </Dialog>
+  );
+}
+
+export function DeleteIconButton({
+  onConfirm,
+  message = "Are you sure you want to delete this?",
+  className = "p-2 text-technic-error hover:bg-technic-error-soft rounded-lg",
+}: {
+  onConfirm: () => void | Promise<void>;
+  message?: string;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)} className={className}>
+        <Trash2 className="h-5 w-5" aria-hidden="true" />
+        <span className="sr-only">Delete</span>
+      </button>
+      <ConfirmDialog
+        open={open}
+        title="Delete"
+        content={message}
+        onClose={() => setOpen(false)}
+        onConfirm={() => {
+          void Promise.resolve(onConfirm()).finally(() => setOpen(false));
+        }}
+      />
+    </>
   );
 }

@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { clearAdminToken, readAdminToken } from "../../../src/lib/session";
+import { apiBaseUrl, clearAdminToken, readAdminToken } from "../../../src/lib/session";
 import {
   LayoutDashboard,
   FileText,
@@ -79,22 +79,24 @@ export default function AdminSidebar({
     }`;
 
   const handleLogout = async () => {
+    const token = readAdminToken();
+    clearAdminToken();
     try {
-      const token = readAdminToken();
-      clearAdminToken();
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/api/auth/logout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        credentials: "include",
-      });
+      await Promise.allSettled([
+        fetch("/api/session", { method: "DELETE" }),
+        fetch(`${apiBaseUrl()}/api/auth/logout`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          credentials: "include",
+        }),
+      ]);
     } catch (e) {
       console.error("Logout error", e);
-    } finally {
-      window.location.href = "/admin/login";
     }
+    window.location.replace("/admin/login");
   };
 
   return (

@@ -28,10 +28,10 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       const [careersRes, blogsRes, servicesRes, productsRes, contactsRes] = await Promise.all([
-        ApiClient.get<any[]>("/api/careers").catch(() => ({ data: [] })),
-        ApiClient.get<any[]>("/api/blogs").catch(() => ({ data: [] })),
-        ApiClient.get<any[]>("/api/services").catch(() => ({ data: [] })),
-        ApiClient.get<any[]>("/api/products").catch(() => ({ data: [] })),
+        ApiClient.get<any[]>("/api/admin/careers").catch(() => ({ data: [] })),
+        ApiClient.get<any[]>("/api/admin/blogs").catch(() => ({ data: [] })),
+        ApiClient.get<any[]>("/api/admin/services").catch(() => ({ data: [] })),
+        ApiClient.get<any[]>("/api/admin/products").catch(() => ({ data: [] })),
         ApiClient.get<any[]>("/api/admin/contacts").catch(() => ({ data: [] })),
       ]);
 

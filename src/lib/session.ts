@@ -1,5 +1,9 @@
 const MAX_AGE = 30 * 24 * 60 * 60;
 
+export function apiBaseUrl() {
+  return (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/+$/, "");
+}
+
 export function readAdminToken() {
   if (typeof document === "undefined") return "";
   const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
@@ -12,5 +16,7 @@ export function saveAdminToken(token: string) {
 }
 
 export function clearAdminToken() {
-  document.cookie = "token=; Path=/; Max-Age=0; SameSite=Lax";
+  const expired = "Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  document.cookie = `token=; ${expired}; SameSite=Lax`;
+  document.cookie = `token=; ${expired}; SameSite=Lax; Secure`;
 }

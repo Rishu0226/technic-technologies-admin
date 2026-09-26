@@ -18,7 +18,7 @@ export default function BlogsListPage() {
 
   const fetchBlogs = async () => {
     try {
-      const response = await ApiClient.get<any[]>('/api/blogs');
+      const response = await ApiClient.get<any[]>('/api/admin/blogs');
       setBlogs(response.data);
     } catch (err) {
       console.error(err);

@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye, Briefcase, Mail, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Eye, Briefcase, Mail, Download, CheckCircle, XCircle, Clock } from "lucide-react";
 import { ApiClient } from "../../../../lib/api";
+import { toast } from "react-hot-toast";
 
 export default function ApplicationsListPage() {
   const [applications, setApplications] = useState<any[]>([]);
@@ -21,6 +22,15 @@ export default function ApplicationsListPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openResume = async (id: string) => {
+    try {
+      const response = await ApiClient.get<{ downloadUrl: string }>(`/api/admin/applications/${id}/resume`);
+      window.open(response.data.downloadUrl, "_blank", "noopener,noreferrer");
+    } catch {
+      toast.error("Could not open the resume.");
     }
   };
 
@@ -83,6 +93,11 @@ export default function ApplicationsListPage() {
                     <Link href={`/admin/applications/${app._id}`} className="text-technic-cyan-deep hover:text-technic-cyan" title="Review Application">
                       <Eye className="w-5 h-5" aria-hidden="true" /><span className="sr-only">View</span>
                     </Link>
+                    {/^https?:\/\//i.test(app.resumeUrl || "") && (
+                      <button type="button" onClick={() => openResume(app._id)} className="text-technic-cyan-deep hover:text-technic-cyan" title="Open resume PDF">
+                        <Download className="w-5 h-5" aria-hidden="true" /><span className="sr-only">Download resume</span>
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

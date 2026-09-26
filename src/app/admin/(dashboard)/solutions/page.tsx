@@ -26,7 +26,7 @@ export default function SolutionsListPage() {
 
   const fetchSolutions = async () => {
     try {
-      const response = await ApiClient.get<SolutionRow[]>("/api/solutions");
+      const response = await ApiClient.get<SolutionRow[]>("/api/admin/solutions");
       setSolutions(response.data);
     } catch (error) {
       console.error(error);

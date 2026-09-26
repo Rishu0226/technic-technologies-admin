@@ -117,24 +117,24 @@ Every `/admin` page except login requires a `token` cookie. There are no role-sp
 | --- | --- | --- | --- | --- | --- |
 | `/` | `src/app/page.tsx` | Landing with a link to login | Proxy redirects before render | None | None |
 | `/admin/login` | `admin/login/page.tsx` | Sign in | Public. A token redirects to `/admin` | None | `POST /api/auth/login` |
-| `/admin` | `(dashboard)/page.tsx` | Counts and shortcuts | Cookie | None | `GET /api/careers`, `/api/blogs`, `/api/services`, `/api/products`, `/api/admin/contacts` |
-| `/admin/blogs` | `blogs/page.tsx` | Blog list | Cookie | None | `GET /api/blogs`, `DELETE /api/admin/blogs/:id` |
+| `/admin` | `(dashboard)/page.tsx` | Counts and shortcuts | Cookie | None | `GET /api/admin/careers`, `/api/admin/blogs`, `/api/admin/services`, `/api/admin/products`, `/api/admin/contacts` |
+| `/admin/blogs` | `blogs/page.tsx` | Blog list | Cookie | None | `GET /api/admin/blogs`, `DELETE /api/admin/blogs/:id` |
 | `/admin/blogs/new` | `blogs/[id]/page.tsx` (`id === "new"`) | Create blog | Cookie | None | `POST /api/admin/blogs`, `POST /api/admin/ai/generate-blog`, `POST /api/admin/upload` |
-| `/admin/blogs/[id]` | same | Edit blog | Cookie | None | `GET /api/blogs`, `PUT /api/admin/blogs/:id`, AI, upload |
-| `/admin/careers` | `careers/page.tsx` | Job list | Cookie | None | `GET /api/careers`, `DELETE /api/admin/careers/:id` |
+| `/admin/blogs/[id]` | same | Edit blog | Cookie | None | `GET /api/admin/blogs`, `PUT /api/admin/blogs/:id`, AI, upload |
+| `/admin/careers` | `careers/page.tsx` | Job list | Cookie | None | `GET /api/admin/careers`, `DELETE /api/admin/careers/:id` |
 | `/admin/careers/new` | `careers/[id]/page.tsx` | Create job | Cookie | None | `POST /api/admin/careers`, `POST /api/admin/ai/generate-career` |
-| `/admin/careers/[id]` | same | Edit job | Cookie | None | `GET /api/careers`, `PUT /api/admin/careers/:id`, AI |
-| `/admin/services` | `services/page.tsx` | Service list | Cookie | None | `GET /api/services`, `DELETE /api/admin/services/:id` |
+| `/admin/careers/[id]` | same | Edit job | Cookie | None | `GET /api/admin/careers`, `PUT /api/admin/careers/:id`, AI |
+| `/admin/services` | `services/page.tsx` | Service list | Cookie | None | `GET /api/admin/services`, `DELETE /api/admin/services/:id` |
 | `/admin/services/new` | `services/[id]/page.tsx` | Create service | Cookie | None | `POST /api/admin/services`, `POST /api/admin/ai/generate-service`, upload |
 | `/admin/services/[id]` | same | Edit service | Cookie | None | `GET /api/admin/services/:id`, `PUT`, AI, upload |
 | `/admin/services/[id]/preview` | `services/[id]/preview/page.tsx` | Draft preview | Cookie | None | `GET /api/admin/services/:id` |
-| `/admin/solutions` | `solutions/page.tsx` | Solution list | Cookie | None | `GET /api/solutions`, `DELETE /api/admin/solutions/:id` |
+| `/admin/solutions` | `solutions/page.tsx` | Solution list | Cookie | None | `GET /api/admin/solutions`, `DELETE /api/admin/solutions/:id` |
 | `/admin/solutions/new` | `solutions/[id]/page.tsx` | Create solution | Cookie | None | `POST /api/admin/solutions`, `POST /api/admin/ai/generate-solution`, upload |
 | `/admin/solutions/[id]` | same | Edit solution | Cookie | None | `GET /api/admin/solutions/:id`, `PUT`, AI, upload |
 | `/admin/solutions/[id]/preview` | `solutions/[id]/preview/page.tsx` | Draft preview | Cookie | None | `GET /api/admin/solutions/:id` |
-| `/admin/products` | `products/page.tsx` | Product list | Cookie | None | `GET /api/products`, `DELETE /api/admin/products/:id` |
+| `/admin/products` | `products/page.tsx` | Product list | Cookie | None | `GET /api/admin/products`, `DELETE /api/admin/products/:id` |
 | `/admin/products/new` | `products/[id]/page.tsx` | Create product | Cookie | None | `POST /api/admin/products`, upload |
-| `/admin/products/[id]` | same | Edit product | Cookie | None | `GET /api/products`, `PUT /api/admin/products/:id`, upload |
+| `/admin/products/[id]` | same | Edit product | Cookie | None | `GET /api/admin/products`, `PUT /api/admin/products/:id`, upload |
 | `/admin/applications` | `applications/page.tsx` | Application list | Cookie | None | `GET /api/admin/applications` |
 | `/admin/applications/[id]` | `applications/[id]/page.tsx` | Review one application | Cookie | None | `GET /api/admin/applications`, `PUT /api/admin/applications/:id/status` |
 | `/admin/contacts` | `contacts/page.tsx` | Inquiry list | Cookie | None | `GET /api/admin/contacts`, `DELETE /api/admin/contacts/:id` |
@@ -211,7 +211,7 @@ window.location.assign("/admin")
 
 What is not implemented: forgot password, reset password, OTP, email verification, refresh token, and a dedicated user-profile fetch.
 
-Token storage: a **non-httpOnly** cookie named `token`, written by `saveAdminToken`. JavaScript can read it. `ApiClient` copies it into `Authorization: Bearer`. Axios also sets `withCredentials: true`.
+Token storage: a **non-httpOnly** cookie named `token`, written by `saveAdminToken`. JavaScript can read it. `ApiClient` copies it into `Authorization: Bearer` for `/api/admin/*` and login. Axios also sets `withCredentials: true`. Content lists and editors do not call the public catalog routes. Those stay published-only for the marketing site.
 
 `src/app/api/session/route.ts` can set an **httpOnly** cookie of the same name, but the login page never calls it. Logout never calls `DELETE /api/session`.
 
@@ -398,10 +398,10 @@ Widgets are five count cards. Each value is `array.length` from:
 
 | Card | Endpoint | Link |
 | --- | --- | --- |
-| Careers | `GET /api/careers` | `/admin/careers` |
-| Blogs | `GET /api/blogs` | `/admin/blogs` |
-| Services | `GET /api/services` | `/admin/services` |
-| Products | `GET /api/products` | `/admin/products` |
+| Careers | `GET /api/admin/careers` | `/admin/careers` |
+| Blogs | `GET /api/admin/blogs` | `/admin/blogs` |
+| Services | `GET /api/admin/services` | `/admin/services` |
+| Products | `GET /api/admin/products` | `/admin/products` |
 | Contacts | `GET /api/admin/contacts` | `/admin/contacts` |
 
 A failed call is replaced with `{ data: [] }`, so that card shows 0. There is no solutions or applications count.
@@ -452,11 +452,11 @@ No table has search, filters, column sorting, pagination, page size, or bulk act
 
 | Table | Route | API | Columns | Client order | Row actions |
 | --- | --- | --- | --- | --- | --- |
-| Blogs | `/admin/blogs` | `GET /api/blogs` | Title, Category, Author, Status, Actions | API order | Edit, Delete |
-| Careers | `/admin/careers` | `GET /api/careers` | Title, Department, Status, Actions | API order | Edit, Delete |
-| Services | `/admin/services` | `GET /api/services` | Order, Icon, Title, Slug, Status, Updated, Actions | `order` ascending | View, Edit, Delete |
-| Solutions | `/admin/solutions` | `GET /api/solutions` | Order, Icon, Title, Slug, Status, Updated, Actions | `order` ascending | View, Edit, Delete |
-| Products | `/admin/products` | `GET /api/products` | Order, Name, Tagline, Type, Status, Actions | `order` ascending | Edit, Delete |
+| Blogs | `/admin/blogs` | `GET /api/admin/blogs` | Title, Category, Author, Status, Actions | API order | Edit, Delete |
+| Careers | `/admin/careers` | `GET /api/admin/careers` | Title, Department, Status, Actions | API order | Edit, Delete |
+| Services | `/admin/services` | `GET /api/admin/services` | Order, Icon, Title, Slug, Status, Updated, Actions | `order` ascending | View, Edit, Delete |
+| Solutions | `/admin/solutions` | `GET /api/admin/solutions` | Order, Icon, Title, Slug, Status, Updated, Actions | `order` ascending | View, Edit, Delete |
+| Products | `/admin/products` | `GET /api/admin/products` | Order, Name, Tagline, Type, Status, Actions | `order` ascending | Edit, Delete |
 | Contacts | `/admin/contacts` | `GET /api/admin/contacts` | Date, Name, Email, Interest, Status, Actions | `createdAt` descending | View, Delete |
 | Applications | `/admin/applications` | `GET /api/admin/applications` | Date, Applicant (+ email), Position (`jobId.title`), Experience, Status, Actions | API order | View only |
 
@@ -642,25 +642,28 @@ There is no permission header.
 | POST | `/api/auth/logout` | End session | Sidebar | Bearer if present | Empty body | Ignored | Still redirects |
 | POST | `/api/session` | Set httpOnly cookie | **No UI caller** | Body token | `{ token: string }` | `{ ok: true }` | 400 `{ error: "Missing token" }` |
 | DELETE | `/api/session` | Clear httpOnly cookie | **No UI caller** | Cookie | None | `{ ok: true }` | — |
-| GET | `/api/blogs` | Blog list and edit lookup | Dashboard, blog list, blog edit | Bearer | None | Array. Edit finds `_id` | List looks empty. Edit sets error |
+| GET | `/api/admin/blogs` | Blog list | Dashboard, blog list | Bearer | None | Array | List looks empty |
+| GET | `/api/admin/blogs/:id` | One blog | Blog edit | Bearer | Path id | Blog document | Inline error |
 | POST | `/api/admin/blogs` | Create blog | Blog form when `id === "new"` | Bearer | Blog payload | Unused | Inline |
 | PUT | `/api/admin/blogs/:id` | Update blog | Blog form | Bearer | Same payload | Unused | Inline |
 | DELETE | `/api/admin/blogs/:id` | Delete blog | Blog list | Bearer | Path id | Unused | Toast |
-| GET | `/api/careers` | Job list and edit lookup | Dashboard, career list, career edit | Bearer | None | Array | Same pattern as blogs |
+| GET | `/api/admin/careers` | Job list | Dashboard, career list | Bearer | None | Array | Empty UI |
+| GET | `/api/admin/careers/:id` | One job | Career edit | Bearer | Path id | Career document | Inline error |
 | POST | `/api/admin/careers` | Create job | Career form | Bearer | Career payload | Unused | Inline |
 | PUT | `/api/admin/careers/:id` | Update job | Career form | Bearer | Same | Unused | Inline |
 | DELETE | `/api/admin/careers/:id` | Delete job | Career list | Bearer | Path id | Unused | Toast |
-| GET | `/api/services` | Service list and dashboard count | Dashboard, service list | Bearer | None | Array with `_id`, `order`, `icon`, `title`, `slug`, `status`, `updatedAt` | Empty UI |
+| GET | `/api/admin/services` | Service list and dashboard count | Dashboard, service list | Bearer | None | Array with `_id`, `order`, `icon`, `title`, `slug`, `status`, `updatedAt` | Empty UI |
 | GET | `/api/admin/services/:id` | One service | Service form, service preview | Bearer | Path id | Full service object spread into the form | Inline / preview text |
 | POST | `/api/admin/services` | Create service | Service form | Bearer | Filtered payload | Unused | Inline |
 | PUT | `/api/admin/services/:id` | Update service | Service form | Bearer | Same | Unused | Inline |
 | DELETE | `/api/admin/services/:id` | Delete service | Service list | Bearer | Path id | Unused | Toast |
-| GET | `/api/solutions` | Solution list | Solution list | Bearer | None | `SolutionRow` | Empty UI |
+| GET | `/api/admin/solutions` | Solution list | Solution list | Bearer | None | `SolutionRow` | Empty UI |
 | GET | `/api/admin/solutions/:id` | One solution | Solution form, preview | Bearer | Path id | Full solution | Inline / preview text |
 | POST | `/api/admin/solutions` | Create | Solution form | Bearer | Filtered payload | Unused | Inline |
 | PUT | `/api/admin/solutions/:id` | Update | Solution form | Bearer | Same | Unused | Inline |
 | DELETE | `/api/admin/solutions/:id` | Delete | Solution list | Bearer | Path id | Unused | Toast |
-| GET | `/api/products` | Product list and edit lookup | Dashboard, product list, product edit | Bearer | None | Array | Empty or form error |
+| GET | `/api/admin/products` | Product list | Dashboard, product list | Bearer | None | Array | Empty UI |
+| GET | `/api/admin/products/:id` | One product | Product edit | Bearer | Path id | Product document | Inline error |
 | POST | `/api/admin/products` | Create | Product form | Bearer | Product fields including `slug`, `shortDescription`, `longDescription`, `type`, and URLs | Unused | Inline |
 | PUT | `/api/admin/products/:id` | Update | Product form | Bearer | Same | Unused | Inline |
 | DELETE | `/api/admin/products/:id` | Delete | Product list | Bearer | Path id | Unused | Toast |
@@ -680,7 +683,7 @@ There is no permission header.
 
 No PATCH. No query parameters on any call.
 
-Blog edit, career edit, and product edit do not have a GET-by-id. They download the public list and `.find` the `_id`. If the public list hides drafts, those editors cannot load the record. That behavior is not verified from this repo.
+Blog, career, and product editors load one record with `GET /api/admin/{resource}/:id`. Lists use the matching `GET /api/admin/{resource}` route. Those routes require the admin Bearer token and include drafts. Public `GET /api/{resource}` stays published-only and is not used by this admin app.
 
 ---
 
@@ -694,14 +697,14 @@ Authentication
   DELETE /api/session
 
 Blogs
-  GET /api/blogs
+  GET /api/admin/blogs
   POST /api/admin/blogs
   PUT /api/admin/blogs/:id
   DELETE /api/admin/blogs/:id
   POST /api/admin/ai/generate-blog
 
 Careers and applications
-  GET /api/careers
+  GET /api/admin/careers
   POST /api/admin/careers
   PUT /api/admin/careers/:id
   DELETE /api/admin/careers/:id
@@ -710,7 +713,7 @@ Careers and applications
   PUT /api/admin/applications/:id/status
 
 Services
-  GET /api/services
+  GET /api/admin/services
   GET /api/admin/services/:id
   POST /api/admin/services
   PUT /api/admin/services/:id
@@ -718,7 +721,7 @@ Services
   POST /api/admin/ai/generate-service
 
 Solutions
-  GET /api/solutions
+  GET /api/admin/solutions
   GET /api/admin/solutions/:id
   POST /api/admin/solutions
   PUT /api/admin/solutions/:id
@@ -726,8 +729,8 @@ Solutions
   POST /api/admin/ai/generate-solution
 
 Products
-  GET /api/products
-  GET /api/products/:slug
+  GET /api/admin/products
+  GET /api/admin/products/:id
   POST /api/admin/products
   PUT /api/admin/products/:id
   DELETE /api/admin/products/:id
@@ -756,23 +759,23 @@ Settings
 | `/admin/login` | `POST /api/auth/login` |
 | Sidebar logout | `POST /api/auth/logout` |
 | `/admin` | GET careers, blogs, services, products, admin contacts |
-| `/admin/blogs` | GET `/api/blogs`, DELETE `/api/admin/blogs/:id` |
+| `/admin/blogs` | GET `/api/admin/blogs`, DELETE `/api/admin/blogs/:id` |
 | `/admin/blogs/new` | POST blog, optional AI, optional upload |
-| `/admin/blogs/[id]` | GET `/api/blogs`, PUT blog, optional AI, optional upload |
-| `/admin/careers` | GET `/api/careers`, DELETE admin career |
+| `/admin/blogs/[id]` | GET `/api/admin/blogs/:id`, PUT blog, optional AI, optional upload |
+| `/admin/careers` | GET `/api/admin/careers`, DELETE admin career |
 | `/admin/careers/new` | POST career, optional AI |
-| `/admin/careers/[id]` | GET `/api/careers`, PUT career, optional AI |
-| `/admin/services` | GET `/api/services`, DELETE admin service |
+| `/admin/careers/[id]` | GET `/api/admin/careers/:id`, PUT career, optional AI |
+| `/admin/services` | GET `/api/admin/services`, DELETE admin service |
 | `/admin/services/new` | POST service, optional AI, optional upload |
 | `/admin/services/[id]` | GET admin service, PUT, optional AI, optional upload |
 | `/admin/services/[id]/preview` | GET admin service |
-| `/admin/solutions` | GET `/api/solutions`, DELETE admin solution |
+| `/admin/solutions` | GET `/api/admin/solutions`, DELETE admin solution |
 | `/admin/solutions/new` | POST solution, optional AI, optional upload |
 | `/admin/solutions/[id]` | GET admin solution, PUT, optional AI, optional upload |
 | `/admin/solutions/[id]/preview` | GET admin solution |
-| `/admin/products` | GET `/api/products`, DELETE admin product |
+| `/admin/products` | GET `/api/admin/products`, DELETE admin product |
 | `/admin/products/new` | POST product, optional upload |
-| `/admin/products/[id]` | GET `/api/products`, PUT, optional upload |
+| `/admin/products/[id]` | GET `/api/admin/products/:id`, PUT, optional upload |
 | `/admin/applications` | GET `/api/admin/applications` |
 | `/admin/applications/[id]` | GET applications, PUT status |
 | `/admin/contacts` | GET contacts, DELETE contact |
@@ -940,7 +943,7 @@ The plan’s rule still holds: this app must not contain database connection str
 ## 33. Gaps
 
 - Backend validation and fields the UI never reads.
-- Whether `GET /api/blogs`, `/api/careers`, and `/api/products` return drafts. Editors depend on those lists.
+- Admin lists use `GET /api/admin/blogs`, `/api/admin/careers`, `/api/admin/services`, `/api/admin/solutions`, and `/api/admin/products`. Those include drafts. Public routes do not.
 - JWT lifetime inside the token. The UI only knows the 30-day cookie and the 401 redirect.
 - `POST /api/session` and `DELETE /api/session` are implemented and unused.
 - Header search, notifications, and the Superuser label are not backed by data.

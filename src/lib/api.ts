@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { clearAdminToken, readAdminToken } from './session';
+import { apiBaseUrl, clearAdminToken, readAdminToken } from './session';
 
 export const ApiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  baseURL: apiBaseUrl(),
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

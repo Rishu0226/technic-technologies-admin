@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ApiClient } from "../../../../../lib/api";
-import { Save, ArrowLeft, Image as ImageIcon, Trash2 } from "lucide-react";
+import { Save, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { DeleteIconButton } from "../../../../../../components/admin/ui/ConfirmDialog";
 import Link from "next/link";
 import AIGenerator from "../../../../../../components/admin/ui/AIGenerator";
 import ImageUpload from "../../../../../../components/admin/ui/ImageUpload";
@@ -41,8 +42,8 @@ export default function BlogFormPage() {
 
   const fetchBlog = async () => {
     try {
-      const response = await ApiClient.get<any[]>(`/api/blogs`);
-      const blog = response.data.find((b: any) => b._id === params.id);
+      const response = await ApiClient.get(`/api/admin/blogs/${params.id}`);
+      const blog = response.data;
       if (blog) {
         setFormData({
           title: blog.title || "",
@@ -88,8 +89,8 @@ export default function BlogFormPage() {
         ...prev,
         title: data.title ?? prev.title,
         slug: data.slug ?? prev.slug,
-        excerpt: data.excerpt ?? prev.excerpt,
-        content: data.content ?? prev.content,
+        excerpt: data.shortDescription || data.excerpt || prev.excerpt,
+        content: data.longDescription || data.content || prev.content,
         author: data.author ?? prev.author,
         category: data.category ?? prev.category,
         featuredImage: data.featuredImage ?? prev.featuredImage,
@@ -233,7 +234,7 @@ export default function BlogFormPage() {
                   <div key={`${item}-${idx}`} className="flex items-center gap-3">
                     <img src={item} alt="" className="h-16 w-24 rounded-lg border border-technic-border object-cover" />
                     <p className="flex-1 break-all text-xs text-technic-muted">{item}</p>
-                    <button type="button" onClick={() => removeArrayItem(setGallery, idx, gallery)} className="p-2 text-technic-error hover:bg-technic-error-soft rounded-lg"><Trash2 className="w-5 h-5" aria-hidden="true" /><span className="sr-only">Delete</span></button>
+                    <DeleteIconButton onConfirm={() => removeArrayItem(setGallery, idx, gallery)} message="Delete this gallery image?" />
                   </div>
                 ))}
                 {gallery.length === 0 && <p className="text-technic-muted italic text-sm">No gallery images added.</p>}

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowDown, ArrowLeft, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Plus, Save } from "lucide-react";
+import { DeleteIconButton } from "../../../../../../components/admin/ui/ConfirmDialog";
 import { ApiClient } from "../../../../../lib/api";
 import AIGenerator from "../../../../../../components/admin/ui/AIGenerator";
 import ImageUpload from "../../../../../../components/admin/ui/ImageUpload";
@@ -121,6 +122,7 @@ export default function SolutionFormPage() {
       title: data.title || prev.title,
       slug: isNew ? (data.slug || prev.slug) : prev.slug,
       shortDescription: data.shortDescription || prev.shortDescription,
+      longDescription: data.longDescription || prev.longDescription,
       description: data.description || prev.description,
       industry: data.industry || prev.industry,
       icon: data.icon || prev.icon,
@@ -316,7 +318,7 @@ function ListEditor<T>({ items, blank, onChange, render }: { items: T[]; blank: 
           <div className="mt-3 flex gap-3">
             <button type="button" onClick={() => move(index, -1)} aria-label="Move up"><ArrowUp className="h-4 w-4" /></button>
             <button type="button" onClick={() => move(index, 1)} aria-label="Move down"><ArrowDown className="h-4 w-4" /></button>
-            <button type="button" onClick={() => onChange(items.filter((_, entryIndex) => entryIndex !== index))} className="text-technic-error" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
+            <DeleteIconButton className="text-technic-error" onConfirm={() => onChange(items.filter((_, entryIndex) => entryIndex !== index))} message="Delete this item?" />
           </div>
         </div>
       ))}

@@ -18,7 +18,7 @@ export default function CareersListPage() {
 
   const fetchCareers = async () => {
     try {
-      const response = await ApiClient.get<any[]>('/api/careers');
+      const response = await ApiClient.get<any[]>('/api/admin/careers');
       setCareers(response.data);
     } catch (err) {
       console.error(err);

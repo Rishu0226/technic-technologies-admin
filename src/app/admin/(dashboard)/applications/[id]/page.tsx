@@ -53,6 +53,17 @@ export default function ApplicationViewPage() {
     }
   };
 
+  const openResume = async (mode: "view" | "download") => {
+    try {
+      const response = await ApiClient.get<{ viewUrl: string; downloadUrl: string }>(`/api/admin/applications/${params.id}/resume`);
+      const url = mode === "download" ? response.data.downloadUrl : response.data.viewUrl;
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (err: unknown) {
+      const response = err as { response?: { data?: { error?: string } } };
+      setError(response.response?.data?.error || "Could not open the resume.");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -119,11 +130,20 @@ export default function ApplicationViewPage() {
                   <Calendar className="w-4 h-4 mr-2" />
                   {new Date(application.createdAt).toLocaleString()}
                 </div>
-                <div className="flex items-center md:justify-end">
-                  <a href={application.resumeUrl} target="_blank" rel="noopener noreferrer" className="bg-white hover:border-technic-cyan hover:text-technic-cyan-deep border border-technic-border text-technic-text px-4 py-2 rounded-lg text-sm flex items-center transition-colors">
-                    <Download className="w-4 h-4 mr-2" />
-                    View Resume
-                  </a>
+                <div className="flex items-center justify-end gap-2">
+                  {/^https?:\/\//i.test(application.resumeUrl || "") ? (
+                    <>
+                      <button type="button" onClick={() => openResume("view")} className="bg-white hover:border-technic-cyan hover:text-technic-cyan-deep border border-technic-border text-technic-text px-4 py-2 rounded-lg text-sm transition-colors">
+                        View PDF
+                      </button>
+                      <button type="button" onClick={() => openResume("download")} className="bg-white hover:border-technic-cyan hover:text-technic-cyan-deep border border-technic-border text-technic-text px-4 py-2 rounded-lg text-sm flex items-center transition-colors">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </button>
+                    </>
+                  ) : application.resumeUrl ? (
+                    <span className="text-sm text-technic-secondary">Resume: {application.resumeUrl}</span>
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -139,7 +159,7 @@ export default function ApplicationViewPage() {
                 {/* Render Dynamic Fields */}
                 {application.fields && Object.entries(application.fields).map(([key, value]) => {
                   // Skip keys that are already main fields
-                  if (['applicantName', 'email', 'phone', 'experience', 'resumeUrl', 'name', 'Full Name', 'Email', 'Phone', 'Experience', 'Resume'].includes(key)) return null;
+                  if (['applicantName', 'email', 'phone', 'experience', 'resumeUrl', 'resume', 'firstName', 'lastName', 'name', 'Full Name', 'Email', 'Phone', 'Experience', 'Resume'].includes(key)) return null;
                   
                   return (
                     <div key={key} className="bg-technic-header0 border border-technic-border p-4 rounded-xl col-span-1 md:col-span-2">

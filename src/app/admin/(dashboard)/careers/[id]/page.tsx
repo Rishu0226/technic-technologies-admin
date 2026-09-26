@@ -6,6 +6,7 @@ import { ApiClient } from "../../../../../lib/api";
 import { Plus, Trash2, Save, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import AIGenerator from "../../../../../../components/admin/ui/AIGenerator";
+import ConfirmDialog, { DeleteIconButton } from "../../../../../../components/admin/ui/ConfirmDialog";
 
 function StringListSection({
   title,
@@ -34,7 +35,7 @@ function StringListSection({
         {items.map((item, idx) => (
           <div key={idx} className="flex gap-2">
             <input value={item} onChange={(e) => onChange(idx, e.target.value)} className="tn-input flex-1" placeholder={placeholder} />
-            <button type="button" onClick={() => onRemove(idx)} className="p-2 text-technic-error hover:bg-technic-error-soft rounded-lg"><Trash2 className="w-5 h-5" aria-hidden="true" /><span className="sr-only">Delete</span></button>
+            <DeleteIconButton onConfirm={() => onRemove(idx)} message={`Delete this ${title.toLowerCase()} item?`} />
           </div>
         ))}
         {items.length === 0 && <p className="text-technic-muted italic text-sm">Nothing added yet. Generate with AI or add items manually.</p>}
@@ -84,6 +85,7 @@ export default function CareerFormPage() {
   const [requirements, setRequirements] = useState<string[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
   const [applicationFields, setApplicationFields] = useState<any[]>(isNew ? JSON.parse(JSON.stringify(COMMON_FIELDS)) : []);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     if (!isNew) {
@@ -93,11 +95,8 @@ export default function CareerFormPage() {
 
   const fetchCareer = async () => {
     try {
-      // Backend actually uses /api/careers/:slug for public fetch, 
-      // but for admin edit we can use /api/careers or a specific admin get if it exists
-      // Wait, let's just fetch all and find it since there's no /admin/careers/:id get endpoint currently.
-      const response = await ApiClient.get<any[]>(`/api/careers`);
-      const career = response.data.find((c: any) => c._id === params.id);
+      const response = await ApiClient.get(`/api/admin/careers/${params.id}`);
+      const career = response.data;
       if (career) {
         setFormData({
           title: career.title || "",
@@ -118,21 +117,18 @@ export default function CareerFormPage() {
         setRequirements(career.requirements || []);
         setSkills(career.skills || []);
         
-        const existingFields = career.applicationFields || [];
-        // Merge existing with common fields to maintain standard set
-        const mergedFields = COMMON_FIELDS.map(common => {
-          const existing = existingFields.find((ef: any) => ef.name === common.name);
-          return existing ? existing : { ...common, active: false };
-        });
-        
-        // Add any custom fields that were created before (if any)
-        existingFields.forEach((ef: any) => {
-          if (!mergedFields.find(mf => mf.name === ef.name)) {
-             mergedFields.push(ef);
-          }
-        });
-        
-        setApplicationFields(mergedFields);
+        const existingFields = Array.isArray(career.applicationFields) ? career.applicationFields : [];
+        setApplicationFields(
+          existingFields.length > 0
+            ? existingFields.map((field: { name?: string; label?: string; type?: string; required?: boolean; active?: boolean }) => ({
+                name: field.name || "",
+                label: field.label || "",
+                type: field.type || "text",
+                required: field.required !== false,
+                active: field.active !== false,
+              }))
+            : JSON.parse(JSON.stringify(COMMON_FIELDS))
+        );
       }
     } catch (err) {
       console.error(err);
@@ -160,6 +156,8 @@ export default function CareerFormPage() {
         employmentType: data.employmentType ?? prev.employmentType,
         experience: data.experience ?? prev.experience,
         description: data.description ?? prev.description,
+        shortDescription: data.shortDescription ?? prev.shortDescription,
+        longDescription: data.longDescription ?? prev.longDescription,
         salary: data.salary ?? prev.salary,
         applicationEmail: data.applicationEmail ?? prev.applicationEmail,
       }));
@@ -190,15 +188,8 @@ export default function CareerFormPage() {
     setApplicationFields([...applicationFields, { name: "", label: "", type: "text", required: true, active: true }]);
   };
 
-  const removeApplicationField = (index: number) => {
-    const newFields = applicationFields.filter((_, i) => i !== index);
-    setApplicationFields(newFields);
-  };
-
-  const updateApplicationField = (index: number, key: string, value: any) => {
-    const newFields = [...applicationFields];
-    newFields[index][key] = value;
-    setApplicationFields(newFields);
+  const updateApplicationField = (index: number, key: string, value: string | boolean) => {
+    setApplicationFields((prev) => prev.map((field, i) => (i === index ? { ...field, [key]: value } : field)));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -232,14 +223,21 @@ export default function CareerFormPage() {
   if (loading) return <div className="text-technic-text p-8">Loading...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto pb-20">
-      <div className="flex items-center mb-8">
-        <Link href="/admin/careers" className="text-technic-muted hover:text-technic-cyan-deep mr-4 transition-colors">
-          <ArrowLeft className="w-6 h-6" />
-        </Link>
-        <h1 className="text-3xl font-bold text-technic-text font-heading">
-          {isNew ? 'Create New Career' : 'Edit Career'}
-        </h1>
+    <div className="max-w-6xl mx-auto pb-20">
+      <div className="flex items-center justify-between mb-8 gap-4">
+        <div className="flex items-center">
+          <Link href="/admin/careers" className="text-technic-muted hover:text-technic-cyan-deep mr-4 transition-colors">
+            <ArrowLeft className="w-6 h-6" />
+          </Link>
+          <h1 className="text-3xl font-bold text-technic-text font-heading">
+            {isNew ? 'Create New Career' : 'Edit Career'}
+          </h1>
+        </div>
+        {!isNew && (
+          <button type="button" onClick={() => setDeleteOpen(true)} className="inline-flex items-center rounded-xl border border-technic-error/30 px-4 py-2 text-sm font-semibold text-technic-error hover:bg-technic-error-soft">
+            <Trash2 className="mr-2 h-4 w-4" /> Delete career
+          </button>
+        )}
       </div>
 
       <AIGenerator onGenerate={handleGenerateCareer} disabled={saving} replaceExisting={!isNew && Boolean(formData.title)} type="career" />
@@ -320,7 +318,7 @@ export default function CareerFormPage() {
             {experienceOptions.map((item, idx) => (
               <div key={idx} className="flex gap-2">
                 <input value={item} onChange={(e) => handleArrayChange(setExperienceOptions, idx, e.target.value, experienceOptions)} className="tn-input flex-1" placeholder="e.g. 0-2 Years" />
-                <button type="button" onClick={() => removeArrayItem(setExperienceOptions, idx, experienceOptions)} className="p-2 text-technic-error hover:bg-technic-error-soft rounded-lg"><Trash2 className="w-5 h-5" aria-hidden="true" /><span className="sr-only">Delete</span></button>
+                <DeleteIconButton onConfirm={() => removeArrayItem(setExperienceOptions, idx, experienceOptions)} message="Delete this experience option?" />
               </div>
             ))}
             {experienceOptions.length === 0 && <p className="text-technic-muted italic text-sm">No options added yet.</p>}
@@ -362,32 +360,30 @@ export default function CareerFormPage() {
               <Plus className="w-4 h-4 mr-1" /> Add Custom Field
             </button>
           </div>
-          <p className="text-sm text-technic-muted mb-6">Choose which fields should be visible on the application form for this position, or add custom ones.</p>
+          <p className="text-sm text-technic-muted mb-6">Every saved field can be edited. Field ID is the form name, Display Label is what applicants see, and Input Type sets the control.</p>
           
           <div className="space-y-4">
             {applicationFields.map((field, idx) => {
-              const isCommon = COMMON_FIELDS.some(c => c.name === field.name);
               return (
               <div key={idx} className={`flex flex-wrap gap-4 items-start p-4 rounded-xl border transition-all ${field.active !== false ? 'bg-technic-bg border-technic-border' : 'bg-technic-neutral-soft border-technic-border opacity-60'}`}>
-                {!isCommon && (
-                  <div className="flex-1 min-w-[150px]">
-                    <label className="block text-xs text-technic-muted mb-1">Field ID *</label>
-                    <input value={field.name} onChange={(e) => updateApplicationField(idx, 'name', e.target.value)} disabled={field.active === false} className="tn-input text-sm text-sm disabled:opacity-50" placeholder="e.g. githubUrl" />
-                  </div>
-                )}
+                <div className="flex-1 min-w-[150px]">
+                  <label className="block text-xs text-technic-muted mb-1">Field ID *</label>
+                  <input value={field.name || ""} onChange={(e) => updateApplicationField(idx, 'name', e.target.value)} disabled={field.active === false} className="tn-input text-sm disabled:opacity-50" placeholder="e.g. firstName" />
+                </div>
                 <div className="flex-1 min-w-[200px]">
                   <label className="block text-xs text-technic-muted mb-1">Display Label</label>
-                  <input value={field.label} onChange={(e) => updateApplicationField(idx, 'label', e.target.value)} disabled={field.active === false} className="tn-input text-sm text-sm disabled:opacity-50" />
+                  <input value={field.label || ""} onChange={(e) => updateApplicationField(idx, 'label', e.target.value)} disabled={field.active === false} className="tn-input text-sm disabled:opacity-50" />
                 </div>
-                <div className="w-32">
+                <div className="w-40">
                   <label className="block text-xs text-technic-muted mb-1">Input Type</label>
-                  <select value={field.type} onChange={(e) => updateApplicationField(idx, 'type', e.target.value)} disabled={field.active === false || isCommon} className="tn-input text-sm text-sm disabled:opacity-50">
+                  <select value={field.type || "text"} onChange={(e) => updateApplicationField(idx, 'type', e.target.value)} disabled={field.active === false} className="tn-input text-sm disabled:opacity-50">
                     <option value="text">Text</option>
                     <option value="email">Email</option>
                     <option value="tel">Phone</option>
                     <option value="textarea">Long Text</option>
                     <option value="select">Dropdown</option>
                     <option value="file">File Upload</option>
+                    <option value="link">Link</option>
                   </select>
                 </div>
                 <div className="w-20 pt-6 flex justify-center">
@@ -401,15 +397,33 @@ export default function CareerFormPage() {
                     {field.active !== false ? <><Eye className="w-4 h-4 mr-2" /> Show</> : <><EyeOff className="w-4 h-4 mr-2" /> Hide</>}
                   </button>
                 </div>
-                {!isCommon && (
-                  <div className="pt-5 flex items-center">
-                    <button type="button" onClick={() => removeApplicationField(idx)} className="p-2 text-technic-error hover:bg-technic-error-soft rounded-lg"><Trash2 className="w-5 h-5" aria-hidden="true" /><span className="sr-only">Delete</span></button>
-                  </div>
-                )}
+                <div className="pt-5">
+                  <DeleteIconButton
+                    onConfirm={() => setApplicationFields((prev) => prev.filter((_, fieldIndex) => fieldIndex !== idx))}
+                    message={`Delete the ${field.label || field.name || "application"} field?`}
+                  />
+                </div>
               </div>
             )})}
           </div>
         </div>
+
+        <ConfirmDialog
+          open={deleteOpen}
+          title="Delete career"
+          content="Delete this career? This cannot be undone."
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={async () => {
+            try {
+              await ApiClient.delete(`/api/admin/careers/${params.id}`);
+              router.push("/admin/careers");
+            } catch (err: unknown) {
+              const response = err as { response?: { data?: { error?: string } } };
+              setError(response.response?.data?.error || "Failed to delete career");
+              setDeleteOpen(false);
+            }
+          }}
+        />
 
         <div className="flex justify-end">
           <button type="submit" disabled={saving} className="bg-brand-gradient text-white px-8 py-3 rounded-xl font-bold flex items-center hover:shadow-tn-sm transition-all disabled:opacity-50">

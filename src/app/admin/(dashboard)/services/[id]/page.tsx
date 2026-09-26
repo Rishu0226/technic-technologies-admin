@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Plus, Save } from "lucide-react";
+import { DeleteIconButton } from "../../../../../../components/admin/ui/ConfirmDialog";
 import { ApiClient } from "../../../../../lib/api";
 import ImageUpload from "../../../../../../components/admin/ui/ImageUpload";
 import AIGenerator from "../../../../../../components/admin/ui/AIGenerator";
@@ -152,6 +153,7 @@ export default function ServiceFormPage() {
       title: data.title || prev.title,
       slug: data.slug || prev.slug,
       shortDescription: data.shortDescription || prev.shortDescription,
+      longDescription: data.longDescription || prev.longDescription,
       description: data.description || prev.description,
       icon: data.icon || prev.icon,
       image: prev.image,
@@ -356,7 +358,7 @@ export default function ServiceFormPage() {
             {formData.deliverables.map((item, index) => (
               <div key={index} className="flex gap-2">
                 <input className="tn-input" value={item} onChange={(event) => setField("deliverables", formData.deliverables.map((entry, entryIndex) => entryIndex === index ? event.target.value : entry))} />
-                <button type="button" onClick={() => setField("deliverables", formData.deliverables.filter((_, entryIndex) => entryIndex !== index))} className="text-technic-error"><Trash2 className="h-4 w-4" /></button>
+                <DeleteIconButton className="text-technic-error" onConfirm={() => setField("deliverables", formData.deliverables.filter((_, entryIndex) => entryIndex !== index))} message="Delete this deliverable?" />
               </div>
             ))}
             <button type="button" onClick={() => setField("deliverables", [...formData.deliverables, ""])} className="inline-flex items-center text-sm font-semibold text-technic-cyan-deep"><Plus className="mr-1 h-4 w-4" /> Add deliverable</button>
@@ -477,7 +479,7 @@ function ListEditor<T>({
           <div className="mt-3 flex gap-3">
             <button type="button" onClick={() => move(index, -1)} className="text-technic-muted" aria-label="Move up"><ArrowUp className="h-4 w-4" /></button>
             <button type="button" onClick={() => move(index, 1)} className="text-technic-muted" aria-label="Move down"><ArrowDown className="h-4 w-4" /></button>
-            <button type="button" onClick={() => onChange(items.filter((_, entryIndex) => entryIndex !== index))} className="text-technic-error" aria-label="Delete"><Trash2 className="h-4 w-4" /></button>
+            <DeleteIconButton className="text-technic-error" onConfirm={() => onChange(items.filter((_, entryIndex) => entryIndex !== index))} message="Delete this item?" />
           </div>
         </div>
       ))}

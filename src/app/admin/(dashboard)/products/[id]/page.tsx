@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ApiClient } from "../../../../../lib/api";
-import { Save, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { Save, ArrowLeft, Plus } from "lucide-react";
+import { DeleteIconButton } from "../../../../../../components/admin/ui/ConfirmDialog";
 import Link from "next/link";
 import ImageUpload from "../../../../../../components/admin/ui/ImageUpload";
 import AIGenerator from "../../../../../../components/admin/ui/AIGenerator";
@@ -113,8 +114,8 @@ export default function ProductFormPage() {
 
   const fetchProduct = async () => {
     try {
-      const response = await ApiClient.get<Record<string, unknown>[]>(`/api/products`);
-      const product = response.data.find((item) => item._id === params.id);
+      const response = await ApiClient.get<Record<string, unknown>>(`/api/admin/products/${params.id}`);
+      const product = response.data;
       if (!product) return;
       const type = product.type === "app" || product.type === "both" ? product.type : "website";
       setFormData({
@@ -180,6 +181,7 @@ export default function ProductFormPage() {
       tagline: data.tagline || prev.tagline,
       description: data.description || prev.description,
       shortDescription: data.shortDescription || data.tagline || prev.shortDescription,
+      longDescription: data.longDescription || prev.longDescription,
       icon: data.icon || prev.icon,
       type,
       playStoreUrl: type === "website" ? "" : data.playStoreUrl || "",
@@ -351,7 +353,7 @@ export default function ProductFormPage() {
                   <div className="flex-1">
                     <ImageUpload label={`Gallery image ${index + 1}`} folder="products" value={item} onChange={(url) => setGallery((prev) => prev.map((entry, i) => i === index ? url : entry))} />
                   </div>
-                  <button type="button" className="mt-8 text-technic-error" onClick={() => setGallery((prev) => prev.filter((_, i) => i !== index))}><Trash2 className="h-5 w-5" /></button>
+                  <DeleteIconButton className="mt-8 text-technic-error" onConfirm={() => setGallery((prev) => prev.filter((_, i) => i !== index))} message="Delete this gallery image?" />
                 </div>
               ))}
             </div>
@@ -364,7 +366,7 @@ export default function ProductFormPage() {
               <input className="tn-input" placeholder="Title" value={item.title} onChange={(event) => setFeatures((prev) => prev.map((row, i) => i === index ? { ...row, title: event.target.value } : row))} />
               <input className="tn-input" placeholder="Description" value={item.description} onChange={(event) => setFeatures((prev) => prev.map((row, i) => i === index ? { ...row, description: event.target.value } : row))} />
               <input className="tn-input" placeholder="Icon" value={item.icon} onChange={(event) => setFeatures((prev) => prev.map((row, i) => i === index ? { ...row, icon: event.target.value } : row))} />
-              <button type="button" className="text-technic-error" onClick={() => setFeatures((prev) => prev.filter((_, i) => i !== index))}><Trash2 className="h-5 w-5" /></button>
+              <DeleteIconButton className="text-technic-error" onConfirm={() => setFeatures((prev) => prev.filter((_, i) => i !== index))} message="Delete this feature?" />
             </div>
           ))}
         </Repeater>
@@ -386,7 +388,7 @@ export default function ProductFormPage() {
             <div key={index} className="grid gap-3 md:grid-cols-[8rem_1fr_auto]">
               <input className="tn-input" placeholder="120+" value={item.value} onChange={(event) => setMetrics((prev) => prev.map((row, i) => i === index ? { ...row, value: event.target.value } : row))} />
               <input className="tn-input" placeholder="Label" value={item.label} onChange={(event) => setMetrics((prev) => prev.map((row, i) => i === index ? { ...row, label: event.target.value } : row))} />
-              <button type="button" className="text-technic-error" onClick={() => setMetrics((prev) => prev.filter((_, i) => i !== index))}><Trash2 className="h-5 w-5" /></button>
+              <DeleteIconButton className="text-technic-error" onConfirm={() => setMetrics((prev) => prev.filter((_, i) => i !== index))} message="Delete this metric?" />
             </div>
           ))}
         </Repeater>
@@ -397,7 +399,7 @@ export default function ProductFormPage() {
               <input className="tn-input" placeholder="Title" value={item.title} onChange={(event) => setBenefits((prev) => prev.map((row, i) => i === index ? { ...row, title: event.target.value } : row))} />
               <input className="tn-input" placeholder="Description" value={item.description} onChange={(event) => setBenefits((prev) => prev.map((row, i) => i === index ? { ...row, description: event.target.value } : row))} />
               <input className="tn-input" placeholder="Icon" value={item.icon} onChange={(event) => setBenefits((prev) => prev.map((row, i) => i === index ? { ...row, icon: event.target.value } : row))} />
-              <button type="button" className="text-technic-error" onClick={() => setBenefits((prev) => prev.filter((_, i) => i !== index))}><Trash2 className="h-5 w-5" /></button>
+              <DeleteIconButton className="text-technic-error" onConfirm={() => setBenefits((prev) => prev.filter((_, i) => i !== index))} message="Delete this benefit?" />
             </div>
           ))}
         </Repeater>
@@ -407,7 +409,7 @@ export default function ProductFormPage() {
             <div key={index} className="grid gap-3 md:grid-cols-[1fr_8rem_auto]">
               <input className="tn-input" placeholder="Next.js" value={item.name} onChange={(event) => setTechnologies((prev) => prev.map((row, i) => i === index ? { ...row, name: event.target.value } : row))} />
               <input className="tn-input" placeholder="Icon" value={item.icon} onChange={(event) => setTechnologies((prev) => prev.map((row, i) => i === index ? { ...row, icon: event.target.value } : row))} />
-              <button type="button" className="text-technic-error" onClick={() => setTechnologies((prev) => prev.filter((_, i) => i !== index))}><Trash2 className="h-5 w-5" /></button>
+              <DeleteIconButton className="text-technic-error" onConfirm={() => setTechnologies((prev) => prev.filter((_, i) => i !== index))} message="Delete this technology?" />
             </div>
           ))}
         </Repeater>
@@ -420,7 +422,7 @@ export default function ProductFormPage() {
                 <option value="android">Android</option>
                 <option value="ios">iOS</option>
               </select>
-              <button type="button" className="text-technic-error" onClick={() => setShots((prev) => prev.filter((_, i) => i !== index))}><Trash2 className="h-5 w-5" /></button>
+              <DeleteIconButton className="text-technic-error" onConfirm={() => setShots((prev) => prev.filter((_, i) => i !== index))} message="Delete this screenshot?" />
             </div>
           ))}
         </Repeater>

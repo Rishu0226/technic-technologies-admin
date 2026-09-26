@@ -20,7 +20,7 @@ export default function ServicesListPage() {
 
   const fetchServices = async () => {
     try {
-      const response = await ApiClient.get<any[]>('/api/services');
+      const response = await ApiClient.get<any[]>('/api/admin/services');
       setServices(response.data);
     } catch (err) {
       console.error(err);
