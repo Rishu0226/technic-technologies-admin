@@ -6,7 +6,7 @@ interface AIGeneratorProps {
   onGenerate: (prompt: string) => Promise<void>;
   disabled?: boolean;
   replaceExisting?: boolean;
-  type: "blog" | "career" | "service" | "solution";
+  type: "blog" | "career" | "service" | "solution" | "product";
 }
 
 function askToReplace() {
@@ -61,6 +61,8 @@ export default function AIGenerator({ onGenerate, disabled, replaceExisting = fa
     ? "e.g., Create a Senior Full Stack Developer position for our Noida office..."
     : type === "solution"
     ? "e.g., Write a Healthcare Solutions page for hospitals and clinics..."
+    : type === "product"
+    ? "e.g., A delivery app. Play Store https://play.google.com/store/apps/details?id=com.example.app and App Store https://apps.apple.com/app/id123. Or a website at https://example.com"
     : "e.g., Write a Custom Website Development service page for growing businesses...";
 
   return (

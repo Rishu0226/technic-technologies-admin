@@ -264,7 +264,7 @@ Applications have no delete button. Settings and media have no delete-all action
 | Careers CRUD | `/admin/careers`, `/admin/careers/[id]` | List, form, AI | Careers + AI | Cookie | Implemented. `applicationEmail` is saved but has no input |
 | Services CRUD + preview | `/admin/services`, `[id]`, `[id]/preview` | List, form, AI, upload | Services admin + public list | Cookie | Implemented |
 | Solutions CRUD + preview | `/admin/solutions`, `[id]`, `[id]/preview` | List, form, AI, upload | Solutions admin + public list | Cookie | Implemented |
-| Products CRUD | `/admin/products`, `[id]` | List, form, upload | Products | Cookie | Implemented. No AI generator |
+| Products CRUD | `/admin/products`, `[id]` | List, form, AI, upload | Products | Cookie | Implemented. Type is website, app, or both |
 | Job applications | `/admin/applications`, `[id]` | List, review form | Applications | Cookie | Read + status/notes. No delete |
 | Contacts | `/admin/contacts`, `[id]` | List, view, status form | Contacts | Cookie | Read, status, delete. No create |
 | Media library | `/admin/media` | `ImageUpload` | Media + upload | Cookie | Upload and copy URL. No delete |
@@ -425,7 +425,7 @@ Grid: 1 column, `sm:2`, `lg:3`, `xl:5`.
 | Career | `/admin/careers/new` and `[id]` | title*, slug*, department*, location*, employment type*, experience display*, salary, status (Draft / Published / Closed), description*, experience options, responsibilities, requirements, skills, application fields | HTML required. Empty list rows are dropped | POST or PUT `/api/admin/careers` | Redirect to list | Inline |
 | Service | `/admin/services/new` and `[id]` | title, slug*, short description, description, icon, images, hero, overview, benefits, features, technologies, process, deliverables, use cases, FAQs, CTA, SEO, order, status | Slug `/^[a-z0-9]+(?:-[a-z0-9]+)*$/`. New records auto-slug from the title until the slug is edited | POST or PUT `/api/admin/services` | Redirect to list | Inline |
 | Solution | `/admin/solutions/new` and `[id]` | Same shape as a service plus industry, card image, overview image, metrics. CTA default button “Talk to Our Experts” | Same slug rule. Slug change on edit shows an orange warning | POST or PUT `/api/admin/solutions` | Redirect to list | Inline |
-| Product | `/admin/products/new` and `[id]` | name*, slug*, tagline*, icon*, order, description*, image, status, feature strings | HTML required | POST or PUT `/api/admin/products` | Redirect to list | Inline |
+| Product | `/admin/products/new` and `[id]` | name*, slug* (auto from the name on create until edited), tagline*, short description, description*, long description HTML, category, type (website / app / both), website and store URLs for the selected type, images, features, metrics, benefits, technology stack, mobile screenshots, CTA, SEO, order, status | Slug `/^[a-z0-9]+(?:-[a-z0-9]+)*$/`. Duplicate slug: “Slug already exists. Please choose another slug.” | POST or PUT `/api/admin/products` | Redirect to list | Inline |
 | Contact status | `/admin/contacts/[id]` | status select | None | `PUT /api/admin/contacts/:id` `{ status }` | Redirect to list | Inline |
 | Application review | `/admin/applications/[id]` | status, notes | None | `PUT /api/admin/applications/:id/status` `{ status, notes }` | Redirect to list | Inline |
 | Settings | `/admin/settings` | companyName*, footer text, email*, phone*, whatsapp, address*, googleMaps iframe text, social URLs (linkedin, twitter, facebook, instagram) | HTML required on the starred fields | `PUT /api/admin/settings` | Green banner 3s | Inline |
@@ -456,7 +456,7 @@ No table has search, filters, column sorting, pagination, page size, or bulk act
 | Careers | `/admin/careers` | `GET /api/careers` | Title, Department, Status, Actions | API order | Edit, Delete |
 | Services | `/admin/services` | `GET /api/services` | Order, Icon, Title, Slug, Status, Updated, Actions | `order` ascending | View, Edit, Delete |
 | Solutions | `/admin/solutions` | `GET /api/solutions` | Order, Icon, Title, Slug, Status, Updated, Actions | `order` ascending | View, Edit, Delete |
-| Products | `/admin/products` | `GET /api/products` | Order, Name, Tagline, Status, Actions | `order` ascending | Edit, Delete |
+| Products | `/admin/products` | `GET /api/products` | Order, Name, Tagline, Type, Status, Actions | `order` ascending | Edit, Delete |
 | Contacts | `/admin/contacts` | `GET /api/admin/contacts` | Date, Name, Email, Interest, Status, Actions | `createdAt` descending | View, Delete |
 | Applications | `/admin/applications` | `GET /api/admin/applications` | Date, Applicant (+ email), Position (`jobId.title`), Experience, Status, Actions | API order | View only |
 
@@ -661,7 +661,7 @@ There is no permission header.
 | PUT | `/api/admin/solutions/:id` | Update | Solution form | Bearer | Same | Unused | Inline |
 | DELETE | `/api/admin/solutions/:id` | Delete | Solution list | Bearer | Path id | Unused | Toast |
 | GET | `/api/products` | Product list and edit lookup | Dashboard, product list, product edit | Bearer | None | Array | Empty or form error |
-| POST | `/api/admin/products` | Create | Product form | Bearer | `{ name, slug, tagline, description, icon, image, order, status, features }` | Unused | Inline |
+| POST | `/api/admin/products` | Create | Product form | Bearer | Product fields including `slug`, `shortDescription`, `longDescription`, `type`, and URLs | Unused | Inline |
 | PUT | `/api/admin/products/:id` | Update | Product form | Bearer | Same | Unused | Inline |
 | DELETE | `/api/admin/products/:id` | Delete | Product list | Bearer | Path id | Unused | Toast |
 | GET | `/api/admin/contacts` | Inquiry list and detail lookup | Dashboard, contact list, contact detail | Bearer | None | Array | Empty or “not found” |
@@ -727,9 +727,11 @@ Solutions
 
 Products
   GET /api/products
+  GET /api/products/:slug
   POST /api/admin/products
   PUT /api/admin/products/:id
   DELETE /api/admin/products/:id
+  POST /api/admin/ai/generate-product
 
 Contacts
   GET /api/admin/contacts

@@ -66,6 +66,7 @@ export default function ProductsListPage() {
                 <th className="p-4 font-medium">Order</th>
                 <th className="p-4 font-medium">Name</th>
                 <th className="p-4 font-medium">Tagline</th>
+                <th className="p-4 font-medium">Type</th>
                 <th className="p-4 font-medium">Status</th>
                 <th className="p-4 font-medium">Actions</th>
               </tr>
@@ -76,6 +77,7 @@ export default function ProductsListPage() {
                   <td className="p-4 text-technic-muted">{product.order}</td>
                   <td className="p-4 text-technic-text font-medium">{product.name}</td>
                   <td className="p-4 text-technic-muted">{product.tagline}</td>
+                  <td className="p-4 text-technic-muted">{product.type === "app" ? "App" : product.type === "website" ? "Website" : product.type === "both" ? "App & Website" : "—"}</td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-md text-xs font-medium ${product.status === 'Published' ? 'bg-technic-success-soft text-technic-success' : 'bg-technic-neutral-soft text-technic-muted'}`}>
                       {product.status}

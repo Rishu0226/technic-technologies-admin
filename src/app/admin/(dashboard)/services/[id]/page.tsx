@@ -20,6 +20,7 @@ type ServiceForm = {
   title: string;
   slug: string;
   shortDescription: string;
+  longDescription: string;
   description: string;
   icon: string;
   image: string;
@@ -54,6 +55,7 @@ function emptyForm(): ServiceForm {
     title: "",
     slug: "",
     shortDescription: "",
+    longDescription: "",
     description: "",
     icon: "Layout",
     image: "",
@@ -108,6 +110,7 @@ export default function ServiceFormPage() {
         ...emptyForm(),
         ...service,
         shortDescription: service.shortDescription || "",
+        longDescription: service.longDescription || "",
         image: service.image || "",
         heroImage: service.heroImage || "",
         heroEyebrow: service.heroEyebrow || "Service",
@@ -193,6 +196,7 @@ export default function ServiceFormPage() {
       title: formData.title,
       slug: formData.slug,
       shortDescription: formData.shortDescription,
+      longDescription: formData.longDescription,
       description: formData.description,
       icon: formData.icon,
       image: formData.image,
@@ -272,6 +276,10 @@ export default function ServiceFormPage() {
           </Field>
           <Field label="Description">
             <textarea required className="tn-input" rows={4} value={formData.description} onChange={(event) => setField("description", event.target.value)} />
+          </Field>
+          <Field label="Long description">
+            <textarea className="tn-input font-mono text-sm" rows={10} value={formData.longDescription} onChange={(event) => setField("longDescription", event.target.value)} placeholder="<h2>Overview</h2><p>Detailed HTML content for the service page.</p>" />
+            <p className="mt-2 text-sm text-technic-muted">Shown on the detail page. Scripts are removed when you save.</p>
           </Field>
           <div className="grid gap-4 md:grid-cols-3">
             <Field label="Icon">

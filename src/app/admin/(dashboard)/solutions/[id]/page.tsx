@@ -22,6 +22,7 @@ type FormState = {
   title: string;
   slug: string;
   shortDescription: string;
+  longDescription: string;
   description: string;
   industry: string;
   icon: string;
@@ -46,7 +47,7 @@ type FormState = {
 
 function emptyForm(): FormState {
   return {
-    title: "", slug: "", shortDescription: "", description: "", industry: "", icon: "Layers", order: 0, status: "Draft",
+    title: "", slug: "", shortDescription: "", longDescription: "", description: "", industry: "", icon: "Layers", order: 0, status: "Draft",
     heroTitle: "", heroDescription: "", heroImage: "", cardImage: "",
     overview: { title: "What We Build", description: "" }, overviewImage: "",
     benefits: [], features: [], useCases: [], process: [], technologies: [], metrics: [], faqs: [],
@@ -84,6 +85,7 @@ export default function SolutionFormPage() {
           ...emptyForm(),
           ...item,
           shortDescription: item.shortDescription || "",
+          longDescription: item.longDescription || "",
           industry: item.industry || "",
           heroTitle: item.heroTitle || "",
           heroDescription: item.heroDescription || "",
@@ -162,6 +164,7 @@ export default function SolutionFormPage() {
       title: form.title,
       slug: form.slug,
       shortDescription: form.shortDescription,
+      longDescription: form.longDescription,
       description: form.description,
       industry: form.industry,
       icon: form.icon,
@@ -218,6 +221,10 @@ export default function SolutionFormPage() {
           </Field>
           <Field label="Short Description"><textarea className="tn-input" rows={2} value={form.shortDescription} onChange={(event) => setForm({ ...form, shortDescription: event.target.value })} /></Field>
           <Field label="Description"><textarea required className="tn-input" rows={4} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} /></Field>
+          <Field label="Long description">
+            <textarea className="tn-input font-mono text-sm" rows={10} value={form.longDescription} onChange={(event) => setForm({ ...form, longDescription: event.target.value })} placeholder="<h2>Overview</h2><p>Detailed HTML content for the solution page.</p>" />
+            <p className="mt-2 text-sm text-technic-muted">Shown on the detail page. Scripts are removed when you save.</p>
+          </Field>
           <div className="grid gap-4 md:grid-cols-4">
             <Field label="Industry"><input className="tn-input" value={form.industry} onChange={(event) => setForm({ ...form, industry: event.target.value })} /></Field>
             <Field label="Icon"><input required className="tn-input" value={form.icon} onChange={(event) => setForm({ ...form, icon: event.target.value })} /></Field>

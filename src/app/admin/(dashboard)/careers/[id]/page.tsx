@@ -72,6 +72,8 @@ export default function CareerFormPage() {
     employmentType: "",
     experience: "",
     description: "",
+    shortDescription: "",
+    longDescription: "",
     status: "Draft",
     salary: "",
     applicationEmail: "",
@@ -105,6 +107,8 @@ export default function CareerFormPage() {
           employmentType: career.employmentType || "",
           experience: career.experience || "",
           description: career.description || "",
+          shortDescription: career.shortDescription || "",
+          longDescription: career.longDescription || "",
           status: career.status || "Draft",
           salary: career.salary || "",
           applicationEmail: career.applicationEmail || "",
@@ -288,8 +292,17 @@ export default function CareerFormPage() {
               </select>
             </div>
             <div className="md:col-span-2">
+              <label className="tn-label">Short description</label>
+              <textarea name="shortDescription" value={formData.shortDescription} onChange={handleChange} rows={2} className="tn-input" placeholder="Short preview for the job" />
+            </div>
+            <div className="md:col-span-2">
               <label className="tn-label">Job Description *</label>
               <textarea name="description" value={formData.description} onChange={handleChange} required rows={5} className="tn-input"></textarea>
+            </div>
+            <div className="md:col-span-2">
+              <label className="tn-label">Long description</label>
+              <textarea name="longDescription" value={formData.longDescription} onChange={handleChange} rows={10} className="tn-input font-mono text-sm" placeholder="<h2>About the role</h2><p>Detailed HTML content.</p>" />
+              <p className="mt-2 text-sm text-technic-muted">Optional rich HTML for the job page. Scripts are removed when you save.</p>
             </div>
           </div>
         </div>
